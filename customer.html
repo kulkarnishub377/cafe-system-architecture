@@ -1,1238 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title># 91 VRS Cafe | Order</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Menu - # 91 VRS Cafe</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        :root {
-            --bg: #0c0c0c;
-            --bg-card: rgba(255, 255, 255, 0.04);
-            --bg-card-hover: rgba(255, 255, 255, 0.08);
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-muted: #666666;
-            --accent: #c9a962;
-            --accent-dark: #b8944d;
-        }
-        
-        .light-mode {
-            --bg: #f8f7f4;
-            --bg-card: rgba(0, 0, 0, 0.03);
-            --bg-card-hover: rgba(0, 0, 0, 0.06);
-            --border: rgba(0, 0, 0, 0.08);
-            --text: #1a1a1a;
-            --text-secondary: #555555;
-            --text-muted: #888888;
-        }
-        
-        html {
-            font-size: 16px;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
-        
-        /* Header */
-        .header {
+        /* Page Specific Styles */
+        .search-wrap {
+            padding: 12px 16px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
             position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--bg);
+            top: 73px;
+            /* Header height approx */
+            z-index: 90;
             border-bottom: 1px solid var(--border);
         }
-        
-        .header-main {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .table-num {
-            padding: 6px 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-        
-        .table-num span {
-            color: var(--accent);
-        }
-        
-        .header-btns {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .icon-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .icon-btn.active {
-            background: rgba(34, 197, 94, 0.15);
-            border-color: rgba(34, 197, 94, 0.4);
-            color: #22c55e;
-        }
-        
-        /* Search */
-        .search-wrap {
-            padding: 0 16px 12px;
-        }
-        
-        .search-box {
-            position: relative;
-        }
-        
-        .search-box i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 12px 12px 12px 42px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 14px;
-            font-family: inherit;
-        }
-        
-        .search-box input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        /* Categories */
+
         .categories-wrap {
-            padding: 0 16px 16px;
+            padding: 12px 16px;
             overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
+            background: var(--bg-dark);
         }
-        
+
         .categories-wrap::-webkit-scrollbar {
             display: none;
         }
-        
+
         .categories {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
-        
+
         .cat-btn {
-            flex-shrink: 0;
+            padding: 8px 16px;
+            border-radius: 100px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 14px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 500;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
+            flex-shrink: 0;
         }
-        
+
         .cat-btn.active {
             background: var(--accent);
-            border-color: var(--accent);
             color: #000;
+            border-color: var(--accent);
         }
-        
-        .cat-btn:active {
-            transform: scale(0.97);
-        }
-        
-        /* Main Content */
+
         .main {
-            padding: 0 12px 120px;
+            padding: 20px 16px 100px;
+            /* Bottom padding for cart bar */
+            max-width: 800px;
+            margin: 0 auto;
         }
-        
-        /* Section Title */
+
         .section-head {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             justify-content: space-between;
-            padding: 0 4px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
+            margin-top: 24px;
         }
-        
+
         .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
         }
-        
+
         .section-count {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
         }
-        
-        /* Trending Scroll */
+
         .trending-section {
-            margin-bottom: 24px;
+            overflow: hidden;
+            margin: 0 -16px;
+            padding: 0 16px;
         }
-        
+
         .trending-scroll {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             overflow-x: auto;
-            padding: 4px;
-            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
+            padding-top: 4px;
+            scrollbar-width: none;
         }
-        
+
         .trending-scroll::-webkit-scrollbar {
             display: none;
         }
-        
+
         .trend-card {
+            min-width: 160px;
+            width: 160px;
             flex-shrink: 0;
-            width: 140px;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .trend-card:active {
-            transform: scale(0.97);
-        }
-        
-        .trend-img {
             position: relative;
-            height: 100px;
         }
-        
+
+        .trend-img {
+            height: 120px;
+            width: 100%;
+            position: relative;
+        }
+
         .trend-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .trend-badge {
             position: absolute;
             top: 8px;
             left: 8px;
-            padding: 3px 8px;
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            border-radius: 12px;
-            font-size: 9px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 700;
-            color: white;
-            text-transform: uppercase;
-        }
-        
-        .veg-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-            background: rgba(0,0,0,0.6);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 4px;
         }
-        
-        .veg-badge.veg {
-            border: 1.5px solid #22c55e;
-        }
-        
-        .veg-badge.veg::after {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #22c55e;
-            border-radius: 50%;
-        }
-        
-        .veg-badge.nonveg {
-            border: 1.5px solid #ef4444;
-        }
-        
-        .veg-badge.nonveg::after {
-            content: '';
-            border-left: 3px solid transparent;
-            border-right: 3px solid transparent;
-            border-bottom: 5px solid #ef4444;
-        }
-        
-        .light-mode .veg-badge {
-            background: rgba(255,255,255,0.9);
-        }
-        
+
         .trend-info {
-            padding: 10px;
+            padding: 12px;
         }
-        
+
         .trend-name {
-            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 2px;
+            font-size: 13px;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .trend-price {
-            font-size: 14px;
-            font-weight: 700;
             color: var(--accent);
+            font-weight: 700;
+            font-size: 14px;
         }
-        
-        /* Menu Grid */
+
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
         }
-        
-        @media (min-width: 480px) {
-            .menu-grid {
-                gap: 12px;
-            }
-        }
-        
-        @media (min-width: 768px) {
-            .menu-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .menu-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        .menu-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.2s;
-        }
-        
-        .menu-card:active {
-            transform: scale(0.98);
-        }
-        
-        .menu-img {
-            position: relative;
-            height: 100px;
-        }
-        
-        @media (min-width: 480px) {
-            .menu-img {
-                height: 120px;
-            }
-        }
-        
-        .menu-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .menu-body {
-            padding: 10px;
-        }
-        
-        @media (min-width: 480px) {
-            .menu-body {
-                padding: 12px;
-            }
-        }
-        
+
+        /* Menu Card Specifics */
         .menu-top {
             display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            margin-bottom: 6px;
+            justify-content: space-between;
+            margin-bottom: 8px;
         }
-        
+
         .menu-name {
-            flex: 1;
-            font-size: 12px;
             font-weight: 600;
+            font-size: 15px;
             line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
-        
-        @media (min-width: 480px) {
-            .menu-name {
-                font-size: 13px;
-            }
-        }
-        
-        .menu-veg {
-            flex-shrink: 0;
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .menu-veg.veg {
-            border: 1.5px solid #22c55e;
-        }
-        
-        .menu-veg.veg::after {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #22c55e;
-            border-radius: 50%;
-        }
-        
-        .menu-veg.nonveg {
-            border: 1.5px solid #ef4444;
-        }
-        
-        .menu-veg.nonveg::after {
-            content: '';
-            border-left: 3px solid transparent;
-            border-right: 3px solid transparent;
-            border-bottom: 5px solid #ef4444;
-        }
-        
+
         .menu-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            margin-top: 12px;
         }
-        
+
         .menu-price {
-            font-size: 14px;
             font-weight: 700;
             color: var(--accent);
-        }
-        
-        @media (min-width: 480px) {
-            .menu-price {
-                font-size: 15px;
-            }
-        }
-        
-        .add-btn {
-            padding: 6px 12px;
-            background: var(--accent);
-            border: none;
-            border-radius: 6px;
-            color: #000;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            transition: all 0.15s;
-        }
-        
-        .add-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .add-btn i {
-            font-size: 14px;
-        }
-        
-        /* Qty Control */
-        .qty-wrap {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            background: rgba(201, 169, 98, 0.15);
-            border-radius: 6px;
-            padding: 2px;
-        }
-        
-        .qty-btn {
-            width: 26px;
-            height: 26px;
-            border-radius: 5px;
-            background: var(--accent);
-            border: none;
-            color: #000;
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        
-        .qty-btn:active {
-            transform: scale(0.9);
-        }
-        
-        .qty-val {
-            min-width: 24px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        /* Empty */
-        .empty {
-            text-align: center;
-            padding: 48px 20px;
-        }
-        
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-        
-        .empty h3 {
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-        
-        .empty p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        
-        /* Cart Bar */
-        .cart-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 90;
-            padding: 12px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, var(--bg) 70%, transparent);
-            pointer-events: none;
-        }
-        
-        .cart-bar-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 14px;
-            background: var(--accent);
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(201, 169, 98, 0.4);
-            cursor: pointer;
-            pointer-events: all;
-            transition: all 0.2s;
-        }
-        
-        .cart-bar-inner:active {
-            transform: scale(0.98);
-        }
-        
-        .cart-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .cart-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(0,0,0,0.15);
+
+        .add-btn {
+            background: var(--bg-card-hover);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .cart-icon i {
-            font-size: 18px;
-            color: #000;
-        }
-        
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 4px;
-            background: #000;
-            border-radius: 9px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .cart-info {
-            color: #000;
-        }
-        
-        .cart-info-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-        }
-        
-        .cart-info-sub {
-            font-size: 11px;
-            opacity: 0.7;
-        }
-        
-        .cart-btn {
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 8px 12px;
-            background: #000;
-            border-radius: 8px;
-            color: var(--accent);
-            font-size: 13px;
-            font-weight: 600;
         }
-        
-        /* Modal Overlay */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            z-index: 200;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
+
+        .add-btn:active {
+            transform: scale(0.95);
         }
-        
-        .overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        /* Cart Modal */
-        .cart-modal {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 90vh;
-            background: var(--bg);
-            border-radius: 20px 20px 0 0;
-            z-index: 201;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .cart-modal.show {
-            transform: translateY(0);
-        }
-        
-        .cart-modal::before {
-            content: '';
-            position: absolute;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-        }
-        
-        .cart-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 16px 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .cart-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 600;
+
+        .qty-wrap {
             display: flex;
             align-items: center;
             gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2px;
         }
-        
-        .cart-title i {
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .qty-val {
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* Cart Bar */
+        .cart-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cart-bar-inner {
+            background: rgba(12, 12, 12, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+
+        .cart-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 24px;
             color: var(--accent);
         }
-        
-        .cart-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            -webkit-overflow-scrolling: touch;
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
         }
-        
-        /* Cart Items */
-        .cart-items {
-            margin-bottom: 16px;
+
+        .cart-info-title {
+            font-weight: 700;
+            font-size: 14px;
         }
-        
+
+        .cart-info-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cart-btn {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: var(--accent);
+        }
+
+        /* Cart Modal Specifics */
         .cart-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            margin-bottom: 8px;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
         }
-        
-        .cart-item:last-child {
-            margin-bottom: 0;
-        }
-        
+
         .cart-item-img {
             width: 50px;
             height: 50px;
             border-radius: 8px;
             object-fit: cover;
-            flex-shrink: 0;
         }
-        
+
         .cart-item-info {
             flex: 1;
-            min-width: 0;
         }
-        
+
         .cart-item-name {
-            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 14px;
         }
-        
+
         .cart-item-price {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        
-        .cart-item-qty {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            background: var(--bg-card-hover);
-            border-radius: 6px;
-            padding: 2px;
-        }
-        
-        .cart-item-qty button {
-            width: 24px;
-            height: 24px;
-            border-radius: 5px;
-            border: none;
-            background: var(--accent);
-            color: #000;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .cart-item-qty span {
-            min-width: 22px;
-            text-align: center;
             font-size: 12px;
-            font-weight: 700;
-        }
-        
-        .cart-item-total {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-left: 6px;
-        }
-        
-        /* Customer Form */
-        .cart-form {
-            margin-bottom: 16px;
-        }
-        
-        .cart-form-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        
-        .cart-input {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
-            font-family: inherit;
-            margin-bottom: 8px;
-        }
-        
-        .cart-input::placeholder {
             color: var(--text-muted);
         }
-        
-        .cart-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .cart-textarea {
-            resize: none;
-            min-height: 60px;
-        }
-        
-        /* Bill Summary */
-        .cart-bill {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-        }
-        
-        .cart-bill-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-secondary);
-            padding: 4px 0;
-        }
-        
-        .cart-bill-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 15px;
-            font-weight: 700;
-            padding-top: 8px;
-            margin-top: 8px;
-            border-top: 1px dashed var(--border);
-        }
-        
-        .cart-bill-total span:last-child {
-            color: var(--accent);
-        }
-        
-        /* Cart Footer */
-        .cart-footer {
-            display: flex;
-            gap: 10px;
-            padding: 12px 16px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            border-top: 1px solid var(--border);
-            background: var(--bg);
-        }
-        
-        .cart-clear {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .cart-checkout {
-            flex: 1;
-            height: 44px;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: #000;
-            font-size: 14px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        
-        .cart-checkout:active {
-            transform: scale(0.98);
-        }
-        
-        /* Success Modal */
-        .success-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .success-content {
+
+        .empty {
             text-align: center;
-            max-width: 320px;
-            width: 100%;
-        }
-        
-        .success-emoji {
-            font-size: 64px;
-            margin-bottom: 16px;
-            animation: bounce 0.5s ease;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        
-        .success-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .success-msg {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-        
-        .success-status {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
-        }
-        
-        .status-head {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: #22c55e;
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-        
-        .pulse {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        
-        .status-steps {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .status-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .step-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-        
-        .step-icon.done { background: #22c55e; color: white; }
-        .step-icon.active { background: #f97316; color: white; animation: pulse 1.5s infinite; }
-        .step-icon.pending { background: var(--bg-card-hover); color: var(--text-muted); }
-        
-        .step-info {
-            text-align: left;
-        }
-        
-        .step-info h4 {
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        .step-info p {
-            font-size: 11px;
+            padding: 40px 0;
             color: var(--text-muted);
         }
-        
-        .success-btns {
-            display: flex;
-            gap: 10px;
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
-        
-        .success-btns button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        
-        .btn-secondary {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-        
-        .btn-primary {
-            background: var(--accent);
-            border: none;
-            color: #000;
-        }
-        
-        /* Orders Modal */
-        .orders-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 250;
-            background: var(--bg);
-            overflow-y: auto;
-        }
-        
-        .orders-header {
-            position: sticky;
-            top: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            z-index: 10;
-        }
-        
-        .orders-content {
-            padding: 16px;
-        }
-        
-        /* Toast */
-        .toast-wrap {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 400;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-width: 90%;
-            width: 340px;
-        }
-        
-        .toast {
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .toast.success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-        
-        /* Confetti */
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            top: -20px;
-            z-index: 500;
-            pointer-events: none;
-            animation: confettiFall 3s linear forwards;
-        }
-        
-        @keyframes confettiFall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-        
-        /* Hide */
-        .hidden { display: none !important; }
     </style>
 </head>
+
 <body>
+    <!-- Background -->
+    <div class="bg-pattern"></div>
+    <div class="grain"></div>
+
     <!-- Header -->
     <header class="header">
-        <div class="header-main">
-            <a href="index.html" class="logo">
+        <div class="logo">
+            <a href="index.html" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
                 <div class="logo-icon">☕</div>
-                <span class="logo-text"># 91 VRS</span>
+                <div class="logo-text"># 91 VRS</div>
             </a>
-            
-            <div class="table-num">
-                Table <span id="tableNum">5</span>
-            </div>
-            
-            <div class="header-btns">
-                <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">
-                    <i class="ri-moon-line" id="themeIcon"></i>
-                </button>
-                <button class="icon-btn" id="vegBtn" onclick="toggleVeg()">
-                    <span style="font-size: 14px;">🥬</span>
-                </button>
-                <button class="icon-btn" onclick="showOrders()">
-                    <i class="ri-file-list-3-line"></i>
-                </button>
-            </div>
         </div>
-        
-        <div class="search-wrap">
-            <div class="search-box">
-                <i class="ri-search-line"></i>
-                <input type="text" id="searchInput" placeholder="Search dishes...">
-            </div>
+
+        <div
+            style="font-weight: 700; font-family: 'Playfair Display', serif; font-size: 18px; position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap;">
+            Table <span id="tableNum" class="text-accent">5</span>
         </div>
-        
-        <div class="categories-wrap">
-            <div class="categories" id="categories"></div>
+
+        <div class="header-actions" style="display:flex; gap:8px;">
+            <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
+                <i class="ri-moon-line" id="themeIcon"></i>
+            </button>
+            <button class="btn-icon" id="vegBtn" onclick="toggleVeg()">
+                <span style="font-size: 14px;">🥬</span>
+            </button>
+            <button class="btn-icon" onclick="showOrders()">
+                <i class="ri-file-list-3-line"></i>
+            </button>
         </div>
     </header>
-    
-    <!-- Main -->
+
+    <!-- Search Bar -->
+    <div class="search-wrap">
+        <div style="position: relative;">
+            <i class="ri-search-line" style="position: absolute; left: 14px; top: 14px; color: var(--text-muted);"></i>
+            <input type="text" id="searchInput" class="input" style="padding-left: 42px;"
+                placeholder="Search dishes (e.g. coffee, burger)...">
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-wrap">
+        <div class="categories" id="categories">
+            <!-- Rendered by JS -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
     <main class="main">
         <!-- Trending -->
         <section class="trending-section" id="trendingSection">
             <div class="section-head">
-                <h2 class="section-title">🔥 Trending</h2>
+                <h2 class="section-title text-accent font-serif">Trending Now</h2>
             </div>
-            <div class="trending-scroll" id="trendingList"></div>
+            <div class="trending-scroll" id="trendingList">
+                <!-- Rendered by JS -->
+            </div>
         </section>
-        
-        <!-- Menu -->
+
+        <!-- Menu Grid -->
         <section>
             <div class="section-head">
-                <h2 class="section-title" id="menuTitle">All Items</h2>
+                <h2 class="section-title font-serif" id="menuTitle">All Items</h2>
                 <span class="section-count" id="menuCount">0 items</span>
             </div>
-            <div class="menu-grid" id="menuGrid"></div>
+
+            <div class="menu-grid" id="menuGrid">
+                <!-- Rendered by JS -->
+            </div>
+
             <div class="empty hidden" id="emptyState">
                 <div class="empty-icon">🔍</div>
                 <h3>No items found</h3>
-                <p>Try a different search</p>
+                <p>Try searching for something else</p>
             </div>
         </section>
     </main>
-    
-    <!-- Cart Bar -->
+
+    <!-- Bottom Cart Bar -->
     <div class="cart-bar hidden" id="cartBar">
         <div class="cart-bar-inner" onclick="openCart()">
             <div class="cart-left">
@@ -1242,7 +446,8 @@
                 </div>
                 <div class="cart-info">
                     <div class="cart-info-title">View Cart</div>
-                    <div class="cart-info-sub"><span id="cartItems">0 items</span> • ₹<span id="cartTotal">0</span></div>
+                    <div class="cart-info-sub"><span id="cartItems">0 items</span> • ₹<span id="cartTotal">0</span>
+                    </div>
                 </div>
             </div>
             <div class="cart-btn">
@@ -1250,112 +455,139 @@
             </div>
         </div>
     </div>
-    
-    <!-- Overlay -->
-    <div class="overlay" id="overlay" onclick="closeCart()"></div>
-    
-    <!-- Cart Modal -->
-    <div class="cart-modal" id="cartModal">
-        <div class="cart-header">
-            <h2 class="cart-title"><i class="ri-shopping-bag-3-line"></i> Your Cart</h2>
-            <button class="icon-btn" onclick="closeCart()"><i class="ri-close-line"></i></button>
+
+    <!-- Cart Modal (Bottom Sheet style) -->
+    <div class="modal-overlay" id="overlay" onclick="closeCart()"></div>
+    <div class="modal modal-bottom" id="cartModal"
+        style="background: var(--bg-dark); border-top: 1px solid var(--border);">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 20px;">Your Cart</h2>
+            <button class="btn-icon" onclick="closeCart()"><i class="ri-close-line"></i></button>
         </div>
-        <div class="cart-body" id="cartBody">
-            <div class="cart-items" id="cartList"></div>
-            <div class="cart-form">
-                <div class="cart-form-label">Your Details (Optional)</div>
-                <input type="text" class="cart-input" id="custName" placeholder="Your name">
-                <textarea class="cart-input cart-textarea" id="custNotes" placeholder="Special instructions..."></textarea>
+
+        <div style="flex: 1; overflow-y: auto; padding: 20px;" id="cartBody">
+            <div id="cartList"></div>
+
+            <div style="margin-top: 24px;">
+                <label class="text-muted"
+                    style="font-size: 12px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block;">Your
+                    Details</label>
+                <input type="text" class="input" id="custName" placeholder="Your Name" style="margin-bottom: 12px;">
+                <textarea class="input" id="custNotes" placeholder="Special Instructions..."
+                    style="min-height: 80px; resize: none;"></textarea>
             </div>
-            <div class="cart-bill">
-                <div class="cart-bill-row"><span>Subtotal</span><span>₹<span id="billSub">0</span></span></div>
-                <div class="cart-bill-row"><span>GST (5%)</span><span>₹<span id="billGst">0</span></span></div>
-                <div class="cart-bill-total"><span>Total</span><span>₹<span id="billTotal">0</span></span></div>
+
+            <div class="card" style="margin-top: 24px; background: rgba(255,255,255,0.02);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                    <span class="text-muted">Subtotal</span>
+                    <span>₹<span id="billSub">0</span></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px;">
+                    <span class="text-muted">GST (5%)</span>
+                    <span>₹<span id="billGst">0</span></span>
+                </div>
+                <div
+                    style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
+                    <span>Total</span>
+                    <span class="text-accent">₹<span id="billTotal">0</span></span>
+                </div>
             </div>
         </div>
-        <div class="cart-footer">
-            <button class="cart-clear" onclick="clearCart()"><i class="ri-delete-bin-line"></i></button>
-            <button class="cart-checkout" onclick="placeOrder()">Place Order • ₹<span id="checkoutTotal">0</span></button>
+
+        <div style="padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 12px;">
+            <button class="btn-icon" onclick="clearCart()" style="color: var(--danger); border-color: var(--danger);"><i
+                    class="ri-delete-bin-line"></i></button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="placeOrder()">
+                Place Order • ₹<span id="checkoutTotal">0</span>
+            </button>
         </div>
     </div>
-    
+
     <!-- Success Modal -->
-    <div class="success-modal hidden" id="successModal">
-        <div class="success-content">
-            <div class="success-emoji">🎉</div>
-            <h2 class="success-title">Order Placed!</h2>
-            <p class="success-msg" id="successMsg">Your order is being prepared</p>
-            <div class="success-status">
-                <div class="status-head"><span class="pulse"></span> Preparing your order</div>
-                <div class="status-steps">
-                    <div class="status-step">
-                        <div class="step-icon done"><i class="ri-check-line"></i></div>
-                        <div class="step-info"><h4>Order Received</h4><p>Just now</p></div>
-                    </div>
-                    <div class="status-step">
-                        <div class="step-icon active"><i class="ri-fire-fill"></i></div>
-                        <div class="step-info"><h4>Preparing</h4><p>Est. 10-15 mins</p></div>
-                    </div>
-                    <div class="status-step">
-                        <div class="step-icon pending"><i class="ri-restaurant-2-fill"></i></div>
-                        <div class="step-info"><h4>Ready to Serve</h4><p>We'll notify you</p></div>
+    <div class="modal modal-center" id="successModal">
+        <div style="text-align: center; padding: 40px 24px;">
+            <div style="font-size: 64px; margin-bottom: 24px; animation: pulse-ring 2s infinite;">🎉</div>
+            <h2 class="font-serif" style="font-size: 28px; margin-bottom: 12px;">Order Placed!</h2>
+            <p class="text-muted" id="successMsg" style="margin-bottom: 32px;">Your order is being prepared.</p>
+
+            <div class="card" style="text-align: left; margin-bottom: 32px; padding: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
+                    <span style="font-weight: 600; color: #22c55e; font-size: 14px;">Preparing Now</span>
+                </div>
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <div class="btn-icon" style="background: #22c55e; color: #fff; border: none; font-size: 16px;"><i
+                            class="ri-check-line"></i></div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;">Order Received</div>
+                        <div style="font-size: 11px;" class="text-muted">Just now</div>
                     </div>
                 </div>
             </div>
-            <div class="success-btns">
-                <button class="btn-secondary" onclick="closeSuccess()">Order More</button>
-                <button class="btn-primary" onclick="showOrders(); closeSuccess();">View Orders</button>
+
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-secondary" onclick="closeSuccess()" style="flex: 1;">Order More</button>
+                <button class="btn btn-primary" onclick="showOrders(); closeSuccess();" style="flex: 1;">View
+                    Status</button>
             </div>
         </div>
     </div>
-    
+
     <!-- Orders Modal -->
-    <div class="orders-modal hidden" id="ordersModal">
-        <div class="orders-header">
-            <h2 class="cart-title"><i class="ri-file-list-3-line" style="color: var(--accent);"></i> Your Orders</h2>
-            <button class="icon-btn" onclick="closeOrders()"><i class="ri-close-line"></i></button>
+    <div class="modal-overlay" id="ordersOverlay" onclick="closeOrders()"></div>
+    <div class="modal modal-bottom" id="ordersModal" style="background: var(--bg-dark); height: 80vh;">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 20px;">Your Orders</h2>
+            <button class="btn-icon" onclick="closeOrders()"><i class="ri-close-line"></i></button>
         </div>
-        <div class="orders-content" id="ordersContent"></div>
+        <div style="padding: 20px; overflow-y: auto; height: 100%;" id="ordersContent"></div>
     </div>
-    
+
     <script src="data.js"></script>
     <script>
+        // Copying the script logic from original file but ensuring it works with new DOM
         let cart = [];
         let currentCat = 'all';
         let currentTable = 5;
-        let vegMode = false;
-        
-        // Init
+        let vegMode = false;        // Logic
         function init() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.has('table')) currentTable = parseInt(params.get('table'));
-            document.getElementById('tableNum').textContent = currentTable;
-            
+            // Theme Check (Immediate)
             const savedTheme = localStorage.getItem('vrs_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
             updateThemeIcon();
-            
+
+            // Query Params
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('table')) currentTable = parseInt(params.get('table'));
+            document.getElementById('tableNum').textContent = currentTable;
+
             renderCategories();
             renderTrending();
             renderMenu();
             setupSearch();
         }
-        
-        // Theme
+
         function toggleTheme() {
+            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
+
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
+
+            setTimeout(() => {
+                document.body.classList.remove('switching-theme');
+            }, 300);
         }
-        
+
         function updateThemeIcon() {
             const icon = document.getElementById('themeIcon');
             const isLight = document.body.classList.contains('light-mode');
             icon.className = isLight ? 'ri-sun-line' : 'ri-moon-line';
         }
-        
-        // Veg Mode
+
         function toggleVeg() {
             vegMode = !vegMode;
             document.getElementById('vegBtn').classList.toggle('active', vegMode);
@@ -1363,8 +595,7 @@
             renderMenu();
             showToast(vegMode ? '🥬 Veg items only' : '🍽️ All items', 'info');
         }
-        
-        // Categories
+
         function renderCategories() {
             document.getElementById('categories').innerHTML = categories.map(cat => `
                 <button class="cat-btn ${currentCat === cat.id ? 'active' : ''}" onclick="selectCat('${cat.id}')">
@@ -1373,35 +604,34 @@
                 </button>
             `).join('');
         }
-        
+
         function selectCat(id) {
             currentCat = id;
             renderCategories();
             renderMenu();
-            document.getElementById('menuTitle').textContent = categories.find(c => c.id === id)?.name || 'All Items';
+            const catName = categories.find(c => c.id === id)?.name || 'All Items';
+            document.getElementById('menuTitle').textContent = catName;
             document.getElementById('trendingSection').style.display = id === 'all' ? 'block' : 'none';
             if (navigator.vibrate) navigator.vibrate(30);
         }
-        
-        // Search
+
         function setupSearch() {
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 renderMenu(e.target.value);
                 document.getElementById('trendingSection').style.display = e.target.value ? 'none' : 'block';
             });
         }
-        
-        // Trending
+
         function renderTrending() {
             let items = DataStore.getMenuItems().filter(i => i.trending && i.inStock);
             if (vegMode) items = items.filter(i => i.isVeg);
-            
+
             document.getElementById('trendingList').innerHTML = items.map(item => `
                 <div class="trend-card" onclick="addToCart(${item.id})">
                     <div class="trend-img">
                         <img src="${item.image}" alt="${item.name}" loading="lazy">
-                        <span class="trend-badge">🔥 Hot</span>
-                        <div class="veg-badge ${item.isVeg ? 'veg' : 'nonveg'}"></div>
+                        <div class="trend-badge">🔥 Hot</div>
+                        <div class="veg-badge ${item.isVeg ? 'veg' : 'nonveg'}" style="position:absolute; bottom:8px; right:8px; top:auto; left:auto; background:white;"></div>
                     </div>
                     <div class="trend-info">
                         <div class="trend-name">${item.emoji} ${item.name}</div>
@@ -1410,39 +640,37 @@
                 </div>
             `).join('');
         }
-        
-        // Menu
+
         function renderMenu(search = '') {
             let items = DataStore.getMenuItems().filter(i => i.inStock);
-            
-            if (currentCat === 'trending') items = items.filter(i => i.trending);
-            else if (currentCat !== 'all') items = items.filter(i => i.category === currentCat);
-            
+            if (currentCat !== 'all' && currentCat !== 'trending') items = items.filter(i => i.category === currentCat);
             if (vegMode) items = items.filter(i => i.isVeg);
-            
             if (search) {
                 const s = search.toLowerCase();
                 items = items.filter(i => i.name.toLowerCase().includes(s) || i.description?.toLowerCase().includes(s));
             }
-            
+
             document.getElementById('menuCount').textContent = `${items.length} items`;
             document.getElementById('emptyState').classList.toggle('hidden', items.length > 0);
             document.getElementById('menuGrid').classList.toggle('hidden', items.length === 0);
-            
+
             document.getElementById('menuGrid').innerHTML = items.map(item => {
                 const inCart = cart.find(c => c.id === item.id);
                 const qty = inCart ? inCart.qty : 0;
-                
+
                 return `
-                    <div class="menu-card">
-                        <div class="menu-img">
-                            <img src="${item.image}" alt="${item.name}" loading="lazy">
-                            <div class="veg-badge ${item.isVeg ? 'veg' : 'nonveg'}" style="top:8px;left:8px;right:auto;"></div>
+                    <div class="card menu-card" style="padding:0;">
+                        <div class="menu-card-img" style="position:relative;">
+                            <img src="${item.image}" style="width:100%; height:100%; object-fit:cover;" alt="${item.name}">
+                            <div class="veg-badge ${item.isVeg ? 'veg' : 'nonveg'}" style="position:absolute; top:12px; left:12px; background:white;"></div>
                         </div>
-                        <div class="menu-body">
+                        <div class="menu-card-body">
                             <div class="menu-top">
                                 <div class="menu-name">${item.emoji} ${item.name}</div>
                             </div>
+                            <p class="text-muted" style="font-size:12px; line-height:1.4; margin-bottom:12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                ${item.description || 'Delicious cafe delicacy'}
+                            </p>
                             <div class="menu-footer">
                                 <div class="menu-price">₹${item.price}</div>
                                 ${qty === 0 ? `
@@ -1460,23 +688,21 @@
                 `;
             }).join('');
         }
-        
-        // Cart Functions
+
         function addToCart(id) {
             const item = DataStore.getMenuItems().find(i => i.id === id);
             if (!item) return;
-            
             const existing = cart.find(c => c.id === id);
             if (existing) existing.qty++;
             else cart.push({ ...item, qty: 1 });
-            
+
             updateCartBar();
             renderMenu(document.getElementById('searchInput').value);
-            renderTrending();
+            renderTrending(); // Update trending list to show quantity if needed? No logic for that yet
             showToast(`${item.emoji} ${item.name} added`, 'success');
             if (navigator.vibrate) navigator.vibrate(30);
         }
-        
+
         function updateQty(id, change) {
             const item = cart.find(c => c.id === id);
             if (item) {
@@ -1485,22 +711,19 @@
             }
             updateCartBar();
             renderMenu(document.getElementById('searchInput').value);
-            renderTrending();
             updateCartModal();
-            if (navigator.vibrate) navigator.vibrate(30);
         }
-        
+
         function updateCartBar() {
             const count = cart.reduce((s, i) => s + i.qty, 0);
             const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            
+
             document.getElementById('cartBadge').textContent = count;
             document.getElementById('cartItems').textContent = `${count} item${count !== 1 ? 's' : ''}`;
             document.getElementById('cartTotal').textContent = total;
             document.getElementById('cartBar').classList.toggle('hidden', count === 0);
         }
-        
-        // Cart Modal
+
         function openCart() {
             if (cart.length === 0) return showToast('Cart is empty', 'info');
             updateCartModal();
@@ -1508,23 +731,23 @@
             document.getElementById('cartModal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
-        
+
         function closeCart() {
             document.getElementById('overlay').classList.remove('show');
             document.getElementById('cartModal').classList.remove('show');
             document.body.style.overflow = '';
         }
-        
+
         function updateCartModal() {
             const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
             const gst = Math.round(subtotal * 0.05);
             const total = subtotal + gst;
-            
+
             document.getElementById('billSub').textContent = subtotal.toLocaleString();
             document.getElementById('billGst').textContent = gst.toLocaleString();
             document.getElementById('billTotal').textContent = total.toLocaleString();
             document.getElementById('checkoutTotal').textContent = total.toLocaleString();
-            
+
             document.getElementById('cartList').innerHTML = cart.map(item => `
                 <div class="cart-item">
                     <img src="${item.image}" class="cart-item-img" alt="${item.name}">
@@ -1532,62 +755,61 @@
                         <div class="cart-item-name">${item.emoji} ${item.name}</div>
                         <div class="cart-item-price">₹${item.price} each</div>
                     </div>
-                    <div class="cart-item-qty">
-                        <button onclick="updateQty(${item.id}, -1)">−</button>
-                        <span>${item.qty}</span>
-                        <button onclick="updateQty(${item.id}, 1)">+</button>
+                    <div class="qty-wrap">
+                        <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                        <span class="qty-val">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
                     </div>
-                    <div class="cart-item-total">₹${item.price * item.qty}</div>
                 </div>
             `).join('');
         }
-        
+
         function clearCart() {
             cart = [];
             updateCartBar();
             renderMenu();
-            renderTrending();
             closeCart();
             showToast('Cart cleared', 'info');
         }
-        
-        // Place Order
+
         function placeOrder() {
             if (cart.length === 0) return;
-            
             const name = document.getElementById('custName').value.trim();
             const notes = document.getElementById('custNotes').value.trim();
-            
+
             DataStore.createSession(currentTable, cart, name, notes);
             DataStore.addKitchenOrder(currentTable, cart, name, notes);
-            
+
             closeCart();
-            
-            document.getElementById('successMsg').textContent = name 
+
+            document.getElementById('successMsg').textContent = name
                 ? `Thanks ${name}! Your order is being prepared`
                 : 'Your order is being prepared';
-            document.getElementById('successModal').classList.remove('hidden');
-            
+
+            document.getElementById('successModal').classList.add('show');
             createConfetti();
             playSound();
-            
+
             cart = [];
             document.getElementById('custName').value = '';
             document.getElementById('custNotes').value = '';
             updateCartBar();
             renderMenu();
-            renderTrending();
         }
-        
+
         function closeSuccess() {
-            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('show');
         }
-        
-        // Orders
+
         function showOrders() {
             const session = DataStore.getSession(currentTable);
             const content = document.getElementById('ordersContent');
-            
+            const overlay = document.getElementById('ordersOverlay');
+            const modal = document.getElementById('ordersModal');
+
+            overlay.classList.add('show');
+            modal.classList.add('show');
+
             if (!session || session.items.length === 0) {
                 content.innerHTML = `
                     <div class="empty">
@@ -1599,52 +821,50 @@
             } else {
                 const subtotal = session.items.reduce((s, i) => s + i.price * i.qty, 0);
                 const gst = Math.round(subtotal * 0.05);
-                
+
                 content.innerHTML = `
-                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 48px; height: 48px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #000;">
-                                ${session.tableNum}
-                            </div>
-                            <div>
-                                <h3 style="font-size: 16px; font-weight: 600;">Table ${session.tableNum}</h3>
-                                <p style="color: var(--text-muted); font-size: 12px;">Started ${formatTime(session.startTime)}</p>
-                            </div>
-                            ${session.customerName ? `<span style="margin-left: auto; padding: 4px 10px; background: rgba(34, 197, 94, 0.15); border-radius: 20px; font-size: 12px; color: #22c55e; font-weight: 600;">${session.customerName}</span>` : ''}
-                        </div>
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="text-accent font-serif" style="font-size: 18px; font-weight: 700;">Table ${session.tableNum}</div>
+                        <div class="text-muted" style="font-size: 13px;">${session.customerName || 'Guest'}</div>
                     </div>
                     
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">ORDERED ITEMS</div>
-                    
+                    <h4 class="text-muted" style="font-size: 12px; text-transform: uppercase; margin-bottom: 12px;">Items Ordered</h4>
                     ${session.items.map(item => `
-                        <div class="cart-item">
-                            <div class="menu-veg ${item.isVeg ? 'veg' : 'nonveg'}"></div>
-                            <div class="cart-item-info">
-                                <div class="cart-item-name">${item.emoji} ${item.name}</div>
-                                <div class="cart-item-price">₹${item.price} × ${item.qty}</div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                            <div>
+                                <div style="font-weight: 600;">${item.qty}x ${item.name}</div>
+                                <div class="text-muted" style="font-size: 12px;">₹${item.price}</div>
                             </div>
-                            <div class="cart-item-total">₹${item.price * item.qty}</div>
+                            <div style="font-weight: 600;">₹${item.price * item.qty}</div>
                         </div>
                     `).join('')}
                     
-                    <div class="cart-bill" style="margin-top: 16px;">
-                        <div class="cart-bill-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
-                        <div class="cart-bill-row"><span>GST (5%)</span><span>₹${gst}</span></div>
-                        <div class="cart-bill-total"><span>Running Total</span><span>₹${subtotal + gst}</span></div>
+                    <div style="margin-top: 24px;">
+                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span class="text-muted">Subtotal</span>
+                            <span>₹${subtotal}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="text-muted">GST (5%)</span>
+                            <span>₹${gst}</span>
+                        </div>
+                        <div style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
+                            <span>Total</span>
+                            <span class="text-accent">₹${subtotal + gst}</span>
+                        </div>
                     </div>
                 `;
             }
-            
-            document.getElementById('ordersModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         }
-        
+
         function closeOrders() {
-            document.getElementById('ordersModal').classList.add('hidden');
-            document.body.style.overflow = '';
+            document.getElementById('ordersOverlay').classList.remove('show');
+            document.getElementById('ordersModal').classList.remove('show');
         }
-        
+
+        // Init
         init();
     </script>
 </body>
+
 </html>

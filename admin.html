@@ -1,396 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title># 91 VRS Cafe | Manager</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Manager - # 91 VRS Cafe</title>
+    <!-- Tailwind removed, using custom design system -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Admin Specific Overrides */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--border);
+            position: fixed;
+            right: 0;
+            top: 80px;
+            bottom: 0;
+            padding: 24px;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 90;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                border-left: none;
+                background: var(--bg-dark);
+                width: 100%;
+                z-index: 200;
+                top: 0;
+            }
+        }
+
+        .map-section {
+            margin-right: 0;
+            transition: margin-right 0.3s;
+            padding: 24px;
+        }
+
+        .map-section.sidebar-open {
+            margin-right: 320px;
+        }
+
+        @media (max-width: 1024px) {
+            .map-section.sidebar-open {
+                margin-right: 0;
+            }
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
-<body class="page">
-    
-    <!-- Print Area -->
-    <div id="printArea">
-        <h1># 91 VRS CAFE</h1>
-        <p style="text-align:center;margin-bottom:10px">Premium Coffee & Dining</p>
-        <div class="divider"></div>
-        <p><strong>Table:</strong> <span id="printTable">-</span></p>
-        <p><strong>Customer:</strong> <span id="printCustomer">Guest</span></p>
-        <p><strong>Date:</strong> <span id="printDate">-</span></p>
-        <p><strong>Bill No:</strong> <span id="printBillNo">-</span></p>
-        <div class="divider"></div>
-        <div id="printItems"></div>
-        <div class="divider"></div>
-        <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><span id="printSubtotal">₹0</span></div>
-        <div style="display:flex;justify-content:space-between"><span>GST (5%):</span><span id="printGST">₹0</span></div>
-        <div class="divider"></div>
-        <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:14px">
-            <span>TOTAL:</span><span id="printTotal">₹0</span>
-        </div>
-        <div class="divider"></div>
-        <p style="text-align:center;margin-top:10px">Thank you for dining with us!</p>
-        <p style="text-align:center">★ Please visit again ★</p>
-    </div>
-    
+
+<body>
+    <div class="bg-pattern"></div>
+    <div class="grain"></div>
+
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <i class="ri-dashboard-3-fill text-2xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="heading text-lg font-bold">Manager Panel</h1>
-                    <p class="text-secondary text-sm"># 91 VRS Cafe</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <div class="hidden md:block text-right mr-2">
-                    <p id="currentTime" class="heading font-bold"></p>
-                    <p id="currentDate" class="text-muted text-sm"></p>
-                </div>
-                <button onclick="toggleTheme()" class="btn-icon">
-                    <i id="themeIcon" class="ri-moon-line text-xl"></i>
-                </button>
-                <button onclick="showMenuManager()" class="btn-icon bg-amber-500/10 border-amber-500/30 text-amber-400">
-                    <i class="ri-restaurant-2-line text-xl"></i>
-                </button>
-                <button onclick="showReports()" class="btn-icon bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
-                    <i class="ri-bar-chart-box-line text-xl"></i>
-                </button>
-                <button onclick="showSettings()" class="btn-icon">
-                    <i class="ri-settings-3-line text-xl"></i>
-                </button>
-                <a href="index.html" class="btn-icon">
-                    <i class="ri-home-4-line text-xl"></i>
-                </a>
-            </div>
+        <div class="logo">
+            <a href="index.html" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
+                <div class="logo-icon">☕</div>
+                <div class="logo-text"># 91 VRS <span
+                        style="font-size: 14px; opacity: 0.6; font-family: 'Inter', sans-serif;">Manager</span></div>
+            </a>
+        </div>
+
+        <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+            <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
+                <i class="ri-moon-line" id="themeIcon"></i>
+            </button>
+            <button class="btn-icon" onclick="toggleSound()" id="soundBtn">
+                <i class="ri-volume-up-line"></i>
+            </button>
+
+            <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
+
+            <button class="btn btn-secondary" onclick="showMenuManager()" style="padding: 10px 16px; font-size: 13px;">
+                <i class="ri-restaurant-2-line"></i> <span class="hidden-mobile">Menu</span>
+            </button>
+            <button class="btn btn-secondary" onclick="showReports()" style="padding: 10px 16px; font-size: 13px;">
+                <i class="ri-bar-chart-line"></i> <span class="hidden-mobile">Reports</span>
+            </button>
+            <button class="btn-icon" onclick="showSettings()">
+                <i class="ri-settings-4-line"></i>
+            </button>
         </div>
     </header>
-    
-    <!-- Stats Bar -->
-    <div class="section grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="card">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-emerald-500/15 rounded-lg flex items-center justify-center">
-                    <i class="ri-money-rupee-circle-fill text-emerald-400 text-xl"></i>
-                </div>
-                <span class="text-muted text-sm">Revenue</span>
-            </div>
-            <p id="statRevenue" class="heading text-2xl font-bold text-emerald-400">₹0</p>
-        </div>
-        <div class="card">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-blue-500/15 rounded-lg flex items-center justify-center">
-                    <i class="ri-file-list-3-fill text-blue-400 text-xl"></i>
-                </div>
-                <span class="text-muted text-sm">Orders</span>
-            </div>
-            <p id="statOrders" class="heading text-2xl font-bold text-blue-400">0</p>
-        </div>
-        <div class="card">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-orange-500/15 rounded-lg flex items-center justify-center">
-                    <i class="ri-restaurant-fill text-orange-400 text-xl"></i>
-                </div>
-                <span class="text-muted text-sm">Active</span>
-            </div>
-            <p id="statActive" class="heading text-2xl font-bold text-orange-400">0</p>
-        </div>
-        <div class="card">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-purple-500/15 rounded-lg flex items-center justify-center">
-                    <i class="ri-pie-chart-fill text-purple-400 text-xl"></i>
-                </div>
-                <span class="text-muted text-sm">Avg Order</span>
-            </div>
-            <p id="statAvg" class="heading text-2xl font-bold text-purple-400">₹0</p>
-        </div>
-    </div>
-    
+
     <!-- Main Content -->
-    <div class="section pt-0 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Floor Map -->
-        <div class="lg:col-span-2 card card-lg">
-            <div class="flex items-center justify-between mb-5">
-                <h2 class="heading font-bold text-lg flex items-center gap-2">
-                    <i class="ri-layout-grid-fill text-purple-400"></i>
-                    Floor Map
-                </h2>
-                <div class="flex items-center gap-4 text-sm">
-                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Free</span>
-                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Occupied</span>
-                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Billed</span>
+    <main class="main-container" style="padding-top: 100px; max-width: 100%;">
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="card stat-card">
+                <div class="stat-value" id="statRevenue">₹0</div>
+                <div class="stat-label">Today's Revenue</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statOrders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-label">Active Tables</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="statAvg">₹0</div>
+                <div class="stat-label">Avg Order Value</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+            <!-- Floor Map -->
+            <div style="flex: 2; min-width: 300px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="font-serif" style="font-size: 24px;">Floor Plan</h2>
+                    <div style="display: flex; gap: 16px; font-size: 13px;">
+                        <span style="display:flex; align-items:center; gap:6px;"><span
+                                style="width:8px; height:8px; background:var(--bg-card); border:1px solid var(--border); border-radius:50%;"></span>
+                            Free</span>
+                        <span style="display:flex; align-items:center; gap:6px;"><span
+                                style="width:8px; height:8px; background:rgba(239, 68, 68, 0.2); border:1px solid #ef4444; border-radius:50%;"></span>
+                            Occupied</span>
+                        <span style="display:flex; align-items:center; gap:6px;"><span
+                                style="width:8px; height:8px; background:rgba(245, 158, 11, 0.2); border:1px solid #f59e0b; border-radius:50%;"></span>
+                            Billed</span>
+                    </div>
+                </div>
+
+                <div class="table-grid" id="floorMap">
+                    <!-- Tables rendered by JS -->
                 </div>
             </div>
-            <div id="floorMap" class="grid grid-cols-3 md:grid-cols-4 gap-4"></div>
+
+            <!-- Live Activity -->
+            <div style="flex: 1; min-width: 300px;">
+                <div class="card" style="height: 100%; min-height: 400px; display: flex; flex-direction: column;">
+                    <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+                        <h3 class="font-serif" style="font-size: 18px;">Live Activity</h3>
+                    </div>
+                    <div id="activityFeed"
+                        style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Feed items -->
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <!-- Activity Feed -->
-        <div class="card card-lg">
-            <h2 class="heading font-bold text-lg flex items-center gap-2 mb-5">
-                <i class="ri-pulse-fill text-pink-400"></i>
-                Live Activity
-            </h2>
-            <div id="activityFeed" class="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar"></div>
-        </div>
-    </div>
-    
+
+    </main>
+
     <!-- Table Sidebar -->
-    <div id="tableSidebar" class="hidden fixed right-0 top-0 bottom-0 w-full md:w-[420px] z-50 border-l animate-slide-in-right overflow-hidden" style="background: var(--bg-primary); border-color: var(--border-color);">
-        <div class="h-full flex flex-col">
-            <div class="p-5 border-b flex items-center justify-between" style="border-color: var(--border-color);">
-                <div class="flex items-center gap-4">
-                    <div id="sidebarIcon" class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-xl font-bold text-white">1</div>
-                    <div>
-                        <h2 class="heading font-bold text-lg">Table <span id="sidebarTableNum">1</span></h2>
-                        <p id="sidebarStatus" class="text-muted text-sm">Loading...</p>
-                    </div>
-                </div>
-                <button onclick="closeSidebar()" class="btn-icon w-10 h-10">
-                    <i class="ri-close-line text-xl"></i>
-                </button>
-            </div>
-            <div id="sidebarContent" class="flex-1 overflow-y-auto p-5 no-scrollbar"></div>
-            <div id="sidebarActions" class="p-5 border-t space-y-3" style="border-color: var(--border-color); background: var(--bg-secondary);"></div>
-        </div>
-    </div>
-    
-    <!-- Sidebar Overlay -->
-    <div id="sidebarOverlay" class="hidden fixed inset-0 z-40 bg-black/50" onclick="closeSidebar()"></div>
-    
+    <aside class="sidebar" id="tableSidebar">
+        <!-- Rendered by JS -->
+    </aside>
+
     <!-- Menu Manager Modal -->
-    <div id="menuModal" class="hidden fixed inset-0 z-50 overflow-auto" style="background: var(--bg-primary);">
-        <div class="section">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="heading font-bold text-xl flex items-center gap-3">
-                    <i class="ri-restaurant-2-line text-amber-400"></i>
-                    Menu Manager
-                </h2>
-                <div class="flex items-center gap-3">
-                    <button onclick="showAddItem()" class="btn btn-primary">
-                        <i class="ri-add-line"></i> Add Item
-                    </button>
-                    <button onclick="hideMenuManager()" class="btn-icon">
-                        <i class="ri-close-line text-xl"></i>
-                    </button>
-                </div>
+    <div class="modal-overlay" id="menuOverlay" onclick="hideMenuManager()"></div>
+    <div class="modal modal-center" id="menuModal"
+        style="max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 20px;">Menu Manager</h2>
+            <button class="btn-icon" onclick="hideMenuManager()"><i class="ri-close-line"></i></button>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="showAddItem()"><i class="ri-add-line"></i> Add Item</button>
+                <input type="text" class="input" placeholder="Search menu..." id="menuSearch"
+                    oninput="renderMenuTable(this.value)">
             </div>
-            
-            <div class="mb-6 overflow-x-auto no-scrollbar pb-2">
-                <div id="menuCategories" class="flex gap-3"></div>
+
+            <div id="menuTableContainer">
+                <!-- Table rendered by JS -->
             </div>
-            
-            <div id="menuGrid" class="grid-2 md:grid-3 lg:grid-4"></div>
         </div>
     </div>
-    
-    <!-- Add/Edit Item Modal -->
-    <div id="itemModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-6" style="background: rgba(0,0,0,0.8);">
-        <div class="card card-lg w-full max-w-lg max-h-[90vh] overflow-auto" style="background: var(--bg-secondary);">
-            <div class="flex items-center justify-between mb-6">
-                <h2 id="itemModalTitle" class="heading font-bold text-lg">Add New Item</h2>
-                <button onclick="hideItemModal()" class="btn-icon w-10 h-10">
-                    <i class="ri-close-line text-xl"></i>
-                </button>
-            </div>
-            
-            <form id="itemForm" class="space-y-5">
-                <input type="hidden" id="editItemId">
-                
-                <div class="input-group">
-                    <label>Name *</label>
-                    <input type="text" id="itemName" required class="input">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="input-group">
-                        <label>Price (₹) *</label>
-                        <input type="number" id="itemPrice" required class="input">
-                    </div>
-                    <div class="input-group">
-                        <label>Category *</label>
-                        <select id="itemCategory" required class="input">
-                            <option value="coffee">Coffee</option>
-                            <option value="burgers">Burgers</option>
-                            <option value="pizza">Pizza</option>
-                            <option value="mains">Mains</option>
-                            <option value="desserts">Desserts</option>
-                            <option value="drinks">Drinks</option>
-                            <option value="snacks">Snacks</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Description</label>
-                    <input type="text" id="itemDesc" class="input">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="input-group">
-                        <label>Emoji</label>
-                        <input type="text" id="itemEmoji" placeholder="🍕" class="input">
-                    </div>
-                    <div class="input-group">
-                        <label>Calories</label>
-                        <input type="number" id="itemCalories" class="input">
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Image URL</label>
-                    <input type="url" id="itemImage" class="input">
-                </div>
-                
-                <div class="flex items-center gap-6 py-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="itemIsVeg" class="w-5 h-5 rounded accent-emerald-500">
-                        <span class="font-medium">Vegetarian</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="itemTrending" class="w-5 h-5 rounded accent-orange-500">
-                        <span class="font-medium">Trending</span>
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-full py-4">
-                    Save Item
-                </button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Reports Modal -->
-    <div id="reportsModal" class="hidden fixed inset-0 z-50 overflow-auto" style="background: var(--bg-primary);">
-        <div class="section max-w-3xl mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="heading font-bold text-xl flex items-center gap-3">
-                    <i class="ri-bar-chart-box-line text-emerald-400"></i>
-                    Sales Reports
-                </h2>
-                <button onclick="hideReports()" class="btn-icon">
-                    <i class="ri-close-line text-xl"></i>
-                </button>
-            </div>
-            <div id="reportsContent"></div>
-        </div>
-    </div>
-    
+
     <!-- Settings Modal -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 overflow-auto" style="background: var(--bg-primary);">
-        <div class="section max-w-lg mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="heading font-bold text-xl flex items-center gap-3">
-                    <i class="ri-settings-3-line text-purple-400"></i>
-                    Settings
-                </h2>
-                <button onclick="hideSettings()" class="btn-icon">
-                    <i class="ri-close-line text-xl"></i>
+    <div class="modal-overlay" id="settingsOverlay" onclick="hideSettings()"></div>
+    <div class="modal modal-center" id="settingsModal">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 20px;">Cafe Settings</h2>
+            <button class="btn-icon" onclick="hideSettings()"><i class="ri-close-line"></i></button>
+        </div>
+        <div style="padding: 24px;">
+            <div style="margin-bottom: 20px;">
+                <label
+                    style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Cafe
+                    Name</label>
+                <input type="text" class="input" id="settingName">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tax
+                        Rate (%)</label>
+                    <input type="number" class="input" id="settingTax">
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Total
+                        Tables</label>
+                    <input type="number" class="input" id="settingTables">
+                </div>
+            </div>
+            <div style="margin-bottom: 32px;">
+                <label
+                    style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Data
+                    Management</label>
+                <button class="btn btn-secondary" onclick="clearAllData()"
+                    style="width: 100%; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
+                    <i class="ri-delete-bin-line"></i> Reset All Data
                 </button>
             </div>
-            
-            <div class="space-y-6">
-                <div class="card card-lg">
-                    <h3 class="heading font-bold mb-4 flex items-center gap-2">
-                        <i class="ri-store-2-line text-emerald-400"></i>
-                        Cafe Details
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="input-group mb-0">
-                            <label>Cafe Name</label>
-                            <input type="text" id="settingName" class="input">
-                        </div>
-                        <div class="input-group mb-0">
-                            <label>Phone</label>
-                            <input type="text" id="settingPhone" class="input">
-                        </div>
-                        <div class="input-group mb-0">
-                            <label>Address</label>
-                            <input type="text" id="settingAddress" class="input">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card card-lg">
-                    <h3 class="heading font-bold mb-4 flex items-center gap-2">
-                        <i class="ri-percent-line text-amber-400"></i>
-                        Tax & Tables
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group mb-0">
-                            <label>Tax Rate (%)</label>
-                            <input type="number" id="settingTax" class="input">
-                        </div>
-                        <div class="input-group mb-0">
-                            <label>Total Tables</label>
-                            <input type="number" id="settingTables" class="input">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card card-lg">
-                    <h3 class="heading font-bold mb-4 flex items-center gap-2">
-                        <i class="ri-delete-bin-line text-red-400"></i>
-                        Data Management
-                    </h3>
-                    <button onclick="clearAllData()" class="w-full btn btn-secondary py-3 border-red-500/30 text-red-400 hover:bg-red-500/10">
-                        Clear All Data
-                    </button>
-                    <p class="text-muted text-xs text-center mt-3">Deletes all sessions, orders, and history</p>
-                </div>
-                
-                <button onclick="saveSettings()" class="btn btn-primary w-full py-4">
-                    Save Settings
-                </button>
-            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="saveSettings()">Save Changes</button>
         </div>
     </div>
-    
+
+    <!-- Add/Edit Item Modal (Nested) -->
+    <div class="modal modal-center" id="itemModal" style="z-index: 205; max-width: 400px;">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 18px;" id="itemModalTitle">Add Item</h2>
+            <button class="btn-icon" onclick="hideItemModal()"><i class="ri-close-line"></i></button>
+        </div>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+            <input type="hidden" id="itemId">
+            <input type="text" class="input" id="itemName" placeholder="Item Name">
+            <input type="text" class="input" id="itemEmoji" placeholder="Emoji (e.g. ☕)">
+            <input type="number" class="input" id="itemPrice" placeholder="Price (₹)">
+            <select class="input" id="itemCat">
+                <option value="coffee">Coffee</option>
+                <option value="food">Food</option>
+                <option value="dessert">Dessert</option>
+                <option value="drinks">Drinks</option>
+            </select>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="itemVeg"> <label for="itemVeg">Is Vegetarian?</label>
+            </div>
+            <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+        </div>
+    </div>
+
+    <!-- Hidden Print Area -->
+    <div id="printArea" style="display: none;"></div>
+
     <script src="data.js"></script>
     <script>
         let selectedTable = null;
-        let menuCategory = 'all';
-        
+        let soundEnabled = true;
+
         function init() {
-            updateClock();
+            // Theme Check (Immediate)
+            const savedTheme = localStorage.getItem('vrs_theme');
+            if (savedTheme === 'light') document.body.classList.add('light-mode');
+
             renderFloorMap();
-            renderActivityFeed();
             updateStats();
-            updateThemeUI(ThemeManager.get());
-            
+            renderActivityFeed();
+
+            // Auto refresh
             setInterval(() => {
                 renderFloorMap();
-                renderActivityFeed();
                 updateStats();
-                if (selectedTable) updateSidebar();
             }, 5000);
-            
-            setInterval(updateClock, 1000);
-            
-            document.getElementById('itemForm').addEventListener('submit', saveItem);
         }
-        
+
+        // --- Core Functions ---
         function toggleTheme() {
-            const theme = ThemeManager.toggle();
-            updateThemeUI(theme);
+            document.body.classList.add('switching-theme');
+            document.body.classList.toggle('light-mode');
+
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+
+            setTimeout(() => {
+                document.body.classList.remove('switching-theme');
+            }, 300);
         }
-        
-        function updateThemeUI(theme) {
-            const icon = document.getElementById('themeIcon');
-            icon.className = theme === 'dark' ? 'ri-moon-line text-xl' : 'ri-sun-line text-xl';
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').innerHTML = soundEnabled ? '<i class="ri-volume-up-line"></i>' : '<i class="ri-volume-mute-line"></i>';
+            document.getElementById('soundBtn').classList.toggle('text-muted', !soundEnabled);
         }
-        
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('currentDate').textContent = formatDate(now);
+
+        // --- Dashboard Renderers ---
+        function renderFloorMap() {
+            const sessions = DataStore.getSessions();
+            const settings = DataStore.getSettings();
+            const total = settings.totalTables || 12;
+
+            const grid = document.getElementById('floorMap');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= total; i++) {
+                const session = sessions[i];
+                const card = document.createElement('div');
+                card.className = `table-card ${session ? (session.billPrinted ? 'billed' : 'occupied') : ''}`;
+                card.onclick = () => openTable(i);
+
+                let icon = session ? (session.billPrinted ? 'ri-bill-line' : 'ri-user-smile-line') : 'ri-checkbox-blank-circle-line';
+                let status = session ? (session.billPrinted ? 'Billed' : 'Occupied') : 'Available';
+
+                card.innerHTML = `
+                    <i class="${icon}" style="font-size: 24px; margin-bottom: 8px; opacity: 0.8;"></i>
+                    <div style="font-weight: 700; font-size: 16px;">T ${i}</div>
+                    <div style="font-size: 11px; text-transform: uppercase; margin-top: 4px; opacity: 0.7;">${status}</div>
+                `;
+                grid.appendChild(card);
+            }
         }
-        
+
         function updateStats() {
             const stats = DataStore.getTodayStats();
             document.getElementById('statRevenue').textContent = '₹' + stats.revenue.toLocaleString();
@@ -398,471 +345,226 @@
             document.getElementById('statActive').textContent = stats.activeTables;
             document.getElementById('statAvg').textContent = '₹' + stats.avgOrder;
         }
-        
-        function renderFloorMap() {
-            const sessions = DataStore.getSessions();
-            const settings = DataStore.getSettings();
-            const total = settings.totalTables || 12;
-            
-            document.getElementById('floorMap').innerHTML = Array.from({length: total}, (_, i) => {
-                const num = i + 1;
-                const session = sessions[num];
-                let bgClass = 'from-emerald-500/15 to-emerald-600/15 border-emerald-500/40 hover:border-emerald-400';
-                let status = 'Available';
-                let icon = '✓';
-                
-                if (session) {
-                    const total = session.items.reduce((s, i) => s + i.price * i.qty, 0);
-                    if (session.billPrinted) {
-                        bgClass = 'from-amber-500/15 to-amber-600/15 border-amber-500/40 hover:border-amber-400';
-                        status = 'Billed';
-                        icon = '💳';
-                    } else {
-                        bgClass = 'from-red-500/15 to-red-600/15 border-red-500/40 hover:border-red-400';
-                        status = '₹' + total;
-                        icon = '🍽️';
-                    }
-                }
-                
-                return `
-                    <button onclick="openTable(${num})" class="bg-gradient-to-br ${bgClass} border-2 rounded-xl p-5 text-center hover:scale-[1.02] transition-all active:scale-[0.98]">
-                        <div class="text-3xl mb-2">${icon}</div>
-                        <p class="heading font-bold">Table ${num}</p>
-                        <p class="text-sm mt-1 ${session ? 'font-medium' : 'text-muted'}">${status}</p>
-                        ${session?.customerName ? `<p class="text-xs text-muted mt-1 truncate">${session.customerName}</p>` : ''}
-                    </button>
-                `;
-            }).join('');
-        }
-        
-        function openTable(num) {
-            selectedTable = num;
-            updateSidebar();
-            document.getElementById('tableSidebar').classList.remove('hidden');
-            document.getElementById('sidebarOverlay').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function updateSidebar() {
-            const session = DataStore.getSession(selectedTable);
-            
-            document.getElementById('sidebarTableNum').textContent = selectedTable;
-            document.getElementById('sidebarIcon').textContent = selectedTable;
-            
-            const content = document.getElementById('sidebarContent');
-            const actions = document.getElementById('sidebarActions');
-            
-            if (!session) {
-                document.getElementById('sidebarStatus').textContent = 'Available';
-                document.getElementById('sidebarIcon').className = 'w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-xl font-bold text-white';
-                content.innerHTML = `
-                    <div class="text-center py-10">
-                        <div class="text-6xl mb-4">✅</div>
-                        <h3 class="heading font-bold text-xl mb-2">Table is Free</h3>
-                        <p class="text-muted mb-6">Ready for new customers</p>
-                        <div class="card text-left">
-                            <p class="text-muted text-sm mb-2">Customer Order Link:</p>
-                            <code class="text-accent text-sm break-all block p-3 rounded-lg" style="background: var(--bg-primary);">customer.html?table=${selectedTable}</code>
-                        </div>
-                    </div>
-                `;
-                actions.innerHTML = '';
-            } else {
-                const total = session.items.reduce((s, i) => s + i.price * i.qty, 0);
-                const gst = Math.round(total * 0.05);
-                const grandTotal = total + gst;
-                const duration = getElapsedMinutes(session.startTime);
-                
-                document.getElementById('sidebarStatus').textContent = session.billPrinted ? 'Bill printed' : `Active ${duration}m`;
-                document.getElementById('sidebarIcon').className = `w-12 h-12 ${session.billPrinted ? 'bg-amber-500' : 'bg-red-500'} rounded-xl flex items-center justify-center text-xl font-bold text-white`;
-                
-                content.innerHTML = `
-                    ${session.customerName ? `
-                    <div class="card mb-5 flex items-center gap-3">
-                        <div class="w-10 h-10 bg-emerald-500/15 rounded-lg flex items-center justify-center">
-                            <i class="ri-user-smile-fill text-emerald-400 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted text-sm">Customer</p>
-                            <p class="heading font-bold">${session.customerName}</p>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="grid grid-cols-2 gap-3 mb-5">
-                        <div class="card text-center">
-                            <p class="text-muted text-xs mb-1">Started</p>
-                            <p class="heading font-bold">${formatTime(session.startTime)}</p>
-                        </div>
-                        <div class="card text-center">
-                            <p class="text-muted text-xs mb-1">Duration</p>
-                            <p class="heading font-bold">${duration} mins</p>
-                        </div>
-                    </div>
-                    
-                    <h3 class="heading font-bold text-secondary text-sm mb-3">Order Items (${session.items.length})</h3>
-                    <div class="space-y-2 mb-5">
-                        ${session.items.map(item => `
-                            <div class="card-sm flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="${item.isVeg ? 'veg-badge' : 'nonveg-badge'}" style="width:12px;height:12px"></div>
-                                    <span class="text-sm">${item.emoji} ${item.name} ×${item.qty}</span>
-                                </div>
-                                <span class="font-bold text-accent text-sm">₹${item.price * item.qty}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="card space-y-2">
-                        <div class="flex justify-between text-secondary text-sm">
-                            <span>Subtotal</span>
-                            <span>₹${total}</span>
-                        </div>
-                        <div class="flex justify-between text-secondary text-sm">
-                            <span>GST (5%)</span>
-                            <span>₹${gst}</span>
-                        </div>
-                        <div class="h-px my-2" style="background: var(--border-color);"></div>
-                        <div class="flex justify-between items-center">
-                            <span class="heading font-bold">Total</span>
-                            <span class="heading text-2xl font-bold text-accent">₹${grandTotal}</span>
-                        </div>
-                    </div>
-                `;
-                
-                actions.innerHTML = `
-                    ${!session.billPrinted ? `
-                        <button onclick="printBill()" class="w-full btn py-3 bg-blue-500 text-white">
-                            <i class="ri-printer-line"></i> Print Bill
-                        </button>
-                    ` : `
-                        <div class="w-full py-3 text-center text-amber-400 card-sm border-amber-500/30">
-                            <i class="ri-check-line"></i> Bill Already Printed
-                        </div>
-                    `}
-                    <button onclick="settleTable()" class="w-full btn btn-primary py-3">
-                        <i class="ri-check-double-line"></i> Settle & Close
-                    </button>
-                    <button onclick="cancelOrder()" class="w-full py-2 text-red-400 text-sm font-medium hover:text-red-300 transition-colors">
-                        Cancel Order
-                    </button>
-                `;
-            }
-        }
-        
-        function closeSidebar() {
-            document.getElementById('tableSidebar').classList.add('hidden');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-            document.body.style.overflow = '';
-            selectedTable = null;
-        }
-        
-        function printBill() {
-            if (!selectedTable) return;
-            
-            const session = DataStore.getSession(selectedTable);
-            if (!session) return;
-            
-            DataStore.markBillPrinted(selectedTable);
-            
-            const total = session.items.reduce((s, i) => s + i.price * i.qty, 0);
-            const gst = Math.round(total * 0.05);
-            
-            document.getElementById('printTable').textContent = selectedTable;
-            document.getElementById('printCustomer').textContent = session.customerName || 'Guest';
-            document.getElementById('printDate').textContent = new Date().toLocaleString('en-IN');
-            document.getElementById('printBillNo').textContent = 'VRS' + Date.now().toString().slice(-6);
-            document.getElementById('printSubtotal').textContent = '₹' + total;
-            document.getElementById('printGST').textContent = '₹' + gst;
-            document.getElementById('printTotal').textContent = '₹' + (total + gst);
-            
-            document.getElementById('printItems').innerHTML = session.items.map(i => `
-                <div style="display:flex;justify-content:space-between;margin:4px 0">
-                    <span>${i.name}</span>
-                    <span>×${i.qty}</span>
-                    <span>₹${i.price * i.qty}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('printArea').style.display = 'block';
-            setTimeout(() => {
-                window.print();
-                document.getElementById('printArea').style.display = 'none';
-                updateSidebar();
-                renderFloorMap();
-                showToast('🧾 Bill printed!', 'success');
-            }, 100);
-        }
-        
-        function settleTable() {
-            if (!selectedTable) return;
-            
-            const session = DataStore.closeSession(selectedTable);
-            if (session) {
-                createConfetti();
-                playSound();
-                const total = session.items.reduce((s, i) => s + i.price * i.qty, 0);
-                showToast(`💰 Table ${selectedTable} settled! ₹${Math.round(total * 1.05)}`, 'success');
-            }
-            
-            closeSidebar();
-            renderFloorMap();
-            renderActivityFeed();
-            updateStats();
-        }
-        
-        function cancelOrder() {
-            if (!selectedTable) return;
-            if (confirm('Cancel this order? This cannot be undone.')) {
-                const sessions = DataStore.getSessions();
-                delete sessions[selectedTable];
-                DataStore.saveSessions(sessions);
-                closeSidebar();
-                renderFloorMap();
-                showToast('Order cancelled', 'info');
-            }
-        }
-        
+
         function renderActivityFeed() {
-            const sales = DataStore.getSalesHistory().slice(-10).reverse();
+            const history = DataStore.getSalesHistory().slice(0, 10);
             const feed = document.getElementById('activityFeed');
-            
-            if (sales.length === 0) {
-                feed.innerHTML = '<p class="text-muted text-center py-8">No activity yet today</p>';
+
+            if (history.length === 0) {
+                feed.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No activity today</div>';
                 return;
             }
-            
-            feed.innerHTML = sales.map(s => `
-                <div class="card-sm flex items-center gap-3">
-                    <span class="text-xl">💰</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-sm truncate">Table ${s.tableNum} ${s.customerName ? '• ' + s.customerName : ''}</p>
-                        <p class="text-muted text-xs">${formatTime(s.closedTime)}</p>
+
+            feed.innerHTML = history.reverse().map(sale => `
+                <div style="padding: 12px; background: var(--bg-card); border-radius: 12px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="font-weight: 600;">Table ${sale.tableNum}</span>
+                        <span class="text-accent font-bold">₹${sale.total}</span>
                     </div>
-                    <span class="text-accent font-bold">₹${(s.total || 0).toLocaleString()}</span>
-                </div>
-            `).join('');
-        }
-        
-        // Menu Manager
-        function showMenuManager() {
-            renderMenuCategories();
-            renderMenuGrid();
-            document.getElementById('menuModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function hideMenuManager() {
-            document.getElementById('menuModal').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-        
-        function renderMenuCategories() {
-            document.getElementById('menuCategories').innerHTML = categories.filter(c => c.id !== 'trending').map(cat => `
-                <button onclick="filterMenu('${cat.id}')" class="flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap font-medium transition-all ${
-                    menuCategory === cat.id 
-                        ? 'bg-emerald-500 text-white shadow-lg' 
-                        : 'card'
-                }">
-                    <span>${cat.emoji}</span>
-                    <span>${cat.name}</span>
-                </button>
-            `).join('');
-        }
-        
-        function filterMenu(catId) {
-            menuCategory = catId;
-            renderMenuCategories();
-            renderMenuGrid();
-        }
-        
-        function renderMenuGrid() {
-            let items = DataStore.getMenuItems();
-            if (menuCategory !== 'all') {
-                items = items.filter(i => i.category === menuCategory);
-            }
-            
-            document.getElementById('menuGrid').innerHTML = items.map(item => `
-                <div class="card overflow-hidden ${!item.inStock ? 'opacity-50' : ''}">
-                    <img src="${item.image}" alt="${item.name}" class="w-full h-28 object-cover">
-                    <div class="p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <div class="${item.isVeg ? 'veg-badge' : 'nonveg-badge'}" style="width:12px;height:12px"></div>
-                            <p class="heading font-bold text-sm truncate">${item.emoji} ${item.name}</p>
-                        </div>
-                        <p class="text-accent font-bold mb-3">₹${item.price}</p>
-                        <div class="flex gap-2">
-                            <button onclick="editItem(${item.id})" class="flex-1 btn btn-secondary py-2 text-sm">
-                                Edit
-                            </button>
-                            <button onclick="deleteItem(${item.id})" class="btn-icon w-10 h-10 bg-red-500/10 border-red-500/30 text-red-400">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-                        </div>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+                        <span>${formatTime(sale.closedTime)}</span>
+                        <span>${sale.items.length} items</span>
                     </div>
                 </div>
             `).join('');
         }
-        
-        function showAddItem() {
-            document.getElementById('itemModalTitle').textContent = 'Add New Item';
-            document.getElementById('itemForm').reset();
-            document.getElementById('editItemId').value = '';
-            document.getElementById('itemModal').classList.remove('hidden');
+
+        // --- Sidebar Logic ---
+        function openTable(num) {
+            selectedTable = num;
+            const sidebar = document.getElementById('tableSidebar');
+            sidebar.classList.add('open');
+            document.querySelector('.map-section').classList.add('sidebar-open');
+            renderSidebar();
         }
-        
-        function editItem(id) {
-            const item = DataStore.getMenuItems().find(i => i.id === id);
-            if (!item) return;
-            
-            document.getElementById('itemModalTitle').textContent = 'Edit Item';
-            document.getElementById('editItemId').value = item.id;
-            document.getElementById('itemName').value = item.name;
-            document.getElementById('itemPrice').value = item.price;
-            document.getElementById('itemCategory').value = item.category;
-            document.getElementById('itemDesc').value = item.description || '';
-            document.getElementById('itemEmoji').value = item.emoji || '';
-            document.getElementById('itemCalories').value = item.calories || '';
-            document.getElementById('itemImage').value = item.image || '';
-            document.getElementById('itemIsVeg').checked = item.isVeg;
-            document.getElementById('itemTrending').checked = item.trending;
-            
-            document.getElementById('itemModal').classList.remove('hidden');
+
+        function closeSidebar() {
+            selectedTable = null;
+            const sidebar = document.getElementById('tableSidebar');
+            sidebar.classList.remove('open');
+            document.querySelector('.map-section').classList.remove('sidebar-open');
         }
-        
-        function hideItemModal() {
-            document.getElementById('itemModal').classList.add('hidden');
-        }
-        
-        function saveItem(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('editItemId').value;
-            const data = {
-                name: document.getElementById('itemName').value,
-                price: parseInt(document.getElementById('itemPrice').value),
-                category: document.getElementById('itemCategory').value,
-                description: document.getElementById('itemDesc').value || '',
-                emoji: document.getElementById('itemEmoji').value || '🍽️',
-                calories: parseInt(document.getElementById('itemCalories').value) || 0,
-                image: document.getElementById('itemImage').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
-                isVeg: document.getElementById('itemIsVeg').checked,
-                trending: document.getElementById('itemTrending').checked,
-                inStock: true
-            };
-            
-            if (id) {
-                DataStore.updateMenuItem(parseInt(id), data);
-                showToast('Item updated!', 'success');
-            } else {
-                DataStore.addMenuItem(data);
-                showToast('Item added!', 'success');
-            }
-            
-            hideItemModal();
-            renderMenuGrid();
-        }
-        
-        function deleteItem(id) {
-            if (confirm('Delete this item?')) {
-                DataStore.deleteMenuItem(id);
-                renderMenuGrid();
-                showToast('Item deleted', 'info');
-            }
-        }
-        
-        // Reports
-        function showReports() {
-            const sales = DataStore.getSalesHistory();
-            const today = new Date().toDateString();
-            const todaySales = sales.filter(s => new Date(s.closedTime).toDateString() === today);
-            
-            const revenue = todaySales.reduce((s, o) => s + (o.total || 0), 0);
-            const orders = todaySales.length;
-            
-            document.getElementById('reportsContent').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="card card-lg text-center">
-                        <div class="text-3xl mb-3">💰</div>
-                        <p class="text-muted mb-1">Today's Revenue</p>
-                        <p class="heading text-2xl font-bold text-accent">₹${revenue.toLocaleString()}</p>
+
+        function renderSidebar() {
+            const container = document.getElementById('tableSidebar');
+            if (!selectedTable) return;
+
+            const session = DataStore.getSession(selectedTable);
+
+            if (!session) {
+                container.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
+                        <button class="btn-icon" onclick="closeSidebar()"><i class="ri-close-line"></i></button>
                     </div>
-                    <div class="card card-lg text-center">
-                        <div class="text-3xl mb-3">📋</div>
-                        <p class="text-muted mb-1">Total Orders</p>
-                        <p class="heading text-2xl font-bold text-blue-400">${orders}</p>
+                    <div style="text-align: center; padding: 40px 0; opacity: 0.5;">
+                        <i class="ri-armchair-line" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                        <p>Table is currently empty</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const subtotal = session.items.reduce((s, i) => s + i.price * i.qty, 0);
+            const gst = Math.round(subtotal * 0.05);
+
+            container.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
+                        <div class="text-muted" style="font-size: 13px;">${session.customerName || 'Guest'}</div>
+                    </div>
+                    <button class="btn-icon" onclick="closeSidebar()"><i class="ri-close-line"></i></button>
+                </div>
+                
+                <div style="flex: 1; overflow-y: auto; margin-bottom: 24px;">
+                    ${session.items.map(item => `
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                            <div>
+                                <div style="font-weight: 600;">${item.qty}x ${item.name}</div>
+                                <div class="text-muted" style="font-size: 12px;">₹${item.price}</div>
+                            </div>
+                            <div style="font-weight: 600;">₹${item.price * item.qty}</div>
+                        </div>
+                    `).join('')}
+                    
+                    <div style="margin-top: 20px; font-size: 14px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span class="text-muted">Subtotal</span>
+                            <span>₹${subtotal}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="text-muted">GST (5%)</span>
+                            <span>₹${gst}</span>
+                        </div>
+                        <div style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
+                            <span>Total</span>
+                            <span class="text-accent">₹${subtotal + gst}</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card card-lg">
-                    <h3 class="heading font-bold mb-4">Recent Transactions</h3>
-                    ${todaySales.length > 0 ? `
-                        <div class="space-y-3">
-                            ${todaySales.slice(-10).reverse().map(s => `
-                                <div class="card-sm flex items-center justify-between">
-                                    <div>
-                                        <span class="font-medium">Table ${s.tableNum}</span>
-                                        ${s.customerName ? `<span class="text-muted"> • ${s.customerName}</span>` : ''}
-                                    </div>
-                                    <span class="text-accent font-bold">₹${(s.total || 0).toLocaleString()}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p class="text-muted text-center py-6">No sales today</p>'}
+                <div style="display: grid; gap: 12px;">
+                    ${!session.billPrinted ? `
+                        <button onclick="printBill(${selectedTable})" class="btn btn-secondary w-full"><i class="ri-printer-line"></i> Print Bill</button>
+                    ` : `
+                        <div class="badge badge-warning" style="text-align: center; padding: 12px;">Bill Printed</div>
+                    `}
+                    <button onclick="settleTable(${selectedTable})" class="btn btn-primary w-full">Settle & Close</button>
                 </div>
             `;
-            
-            document.getElementById('reportsModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         }
-        
-        function hideReports() {
-            document.getElementById('reportsModal').classList.add('hidden');
-            document.body.style.overflow = '';
+
+        // --- Actions ---
+        function printBill(tableNum) {
+            DataStore.markBillPrinted(tableNum);
+
+            // Mock Print Logic
+            const session = DataStore.getSession(tableNum);
+            const printContent = `
+                <div style="text-align: center; font-family: monospace; padding: 20px;">
+                    <h2># 91 VRS Cafe</h2>
+                    <p>Table ${tableNum} • ${new Date().toLocaleString()}</p>
+                    <hr>
+                    ${session.items.map(i => `<div>${i.qty} x ${i.name} - ${i.price * i.qty}</div>`).join('')}
+                    <hr>
+                    <h3>Total: ₹${session.items.reduce((s, i) => s + i.price * i.qty, 0)}</h3>
+                </div>
+            `;
+
+            const printWindow = window.open('', '', 'width=400,height=600');
+            printWindow.document.write(printContent);
+            printWindow.print();
+            printWindow.close();
+
+            renderFloorMap();
+            renderSidebar();
         }
-        
-        // Settings
+
+        function settleTable(tableNum) {
+            if (confirm(`Settle bill for Table ${tableNum}?`)) {
+                DataStore.closeSession(tableNum);
+                closeSidebar();
+                renderFloorMap();
+                updateStats();
+                showToast('Table settled successfully', 'success');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure? This will wipe all data.')) {
+                DataStore.clearAll();
+                window.location.reload();
+            }
+        }
+
+        // --- Menu Manager ---
+        function showMenuManager() {
+            document.getElementById('menuOverlay').classList.add('show');
+            document.getElementById('menuModal').classList.add('show');
+            renderMenuTable();
+        }
+
+        function hideMenuManager() {
+            document.getElementById('menuOverlay').classList.remove('show');
+            document.getElementById('menuModal').classList.remove('show');
+        }
+
+        function renderMenuTable(search = '') {
+            let items = DataStore.getMenuItems();
+            if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
+
+            const container = document.getElementById('menuTableContainer');
+            if (items.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center p-4">No items found</p>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px;">
+                     <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">${item.emoji}</span>
+                        <div>
+                            <div style="font-weight: 600;">${item.name}</div>
+                            <div class="text-muted" style="font-size: 12px;">₹${item.price} • ${item.category}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-icon" style="width: 32px; height: 32px;" onclick="editItem(${item.id})"><i class="ri-edit-line"></i></button>
+                        <button class="btn-icon" style="width: 32px; height: 32px; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" onclick="deleteItem(${item.id})"><i class="ri-delete-bin-line"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Settings ---
         function showSettings() {
             const s = DataStore.getSettings();
             document.getElementById('settingName').value = s.cafeName;
-            document.getElementById('settingPhone').value = s.phone;
-            document.getElementById('settingAddress').value = s.address;
             document.getElementById('settingTax').value = s.taxRate;
             document.getElementById('settingTables').value = s.totalTables;
-            
-            document.getElementById('settingsModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            document.getElementById('settingsOverlay').classList.add('show');
+            document.getElementById('settingsModal').classList.add('show');
         }
-        
+
         function hideSettings() {
-            document.getElementById('settingsModal').classList.add('hidden');
-            document.body.style.overflow = '';
+            document.getElementById('settingsOverlay').classList.remove('show');
+            document.getElementById('settingsModal').classList.remove('show');
         }
-        
+
         function saveSettings() {
             DataStore.saveSettings({
                 cafeName: document.getElementById('settingName').value,
-                phone: document.getElementById('settingPhone').value,
-                address: document.getElementById('settingAddress').value,
                 taxRate: parseInt(document.getElementById('settingTax').value),
                 totalTables: parseInt(document.getElementById('settingTables').value)
             });
             hideSettings();
             renderFloorMap();
-            showToast('Settings saved!', 'success');
+            showToast('Settings saved', 'success');
         }
-        
-        function clearAllData() {
-            if (confirm('Delete ALL data? This cannot be undone!')) {
-                DataStore.clearAll();
-                renderFloorMap();
-                renderActivityFeed();
-                updateStats();
-                showToast('All data cleared', 'info');
-            }
-        }
-        
+
         init();
     </script>
 </body>
+
 </html>

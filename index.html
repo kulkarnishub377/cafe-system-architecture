@@ -1,638 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title># 91 VRS Cafe - Welcome</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --bg-dark: #0c0c0c;
-            --bg-light: #f8f7f4;
-            --text-dark: #ffffff;
-            --text-light: #1a1a1a;
-            --accent: #c9a962;
-            --accent-hover: #b8944d;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-dark);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        body.light-mode {
-            background: var(--bg-light);
-            color: var(--text-light);
-        }
-        
-        /* Animated Background */
-        .bg-pattern {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(201, 169, 98, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 40% 80%, rgba(201, 169, 98, 0.06) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .light-mode .bg-pattern {
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(201, 169, 98, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 40% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 40%);
-        }
-        
-        /* Grain Overlay */
-        .grain {
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        .light-mode .grain {
-            opacity: 0.02;
-        }
-        
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            padding: 20px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            background: rgba(12, 12, 12, 0.5);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .light-mode .header {
-            background: rgba(248, 247, 244, 0.8);
-            border-bottom-color: rgba(0,0,0,0.05);
-        }
-        
-        @media (max-width: 640px) {
-            .header {
-                padding: 16px 20px;
-            }
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 8px 24px rgba(201, 169, 98, 0.3);
-        }
-        
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: -0.5px;
-        }
-        
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .theme-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: inherit;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .light-mode .theme-btn {
-            background: rgba(0,0,0,0.05);
-            border-color: rgba(0,0,0,0.1);
-        }
-        
-        .theme-btn:hover {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #000;
-            transform: scale(1.05);
-        }
-        
-        /* Main Container */
-        .main-container {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 120px 32px 60px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        @media (max-width: 640px) {
-            .main-container {
-                padding: 100px 20px 40px;
-            }
-        }
-        
-        /* Hero Section */
         .hero {
             text-align: center;
-            margin-bottom: 64px;
-        }
-        
-        @media (max-width: 640px) {
-            .hero {
-                margin-bottom: 48px;
-            }
-        }
-        
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #22c55e;
-            margin-bottom: 28px;
-            letter-spacing: 0.5px;
-        }
-        
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            background: #22c55e;
-            border-radius: 50%;
+            padding: 60px 20px 80px;
             position: relative;
         }
-        
-        .pulse-dot::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            background: rgba(34, 197, 94, 0.4);
-            border-radius: 50%;
-            animation: pulse-ring 2s ease-out infinite;
-        }
-        
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-        
+
         .hero-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(42px, 9vw, 88px);
+            font-size: clamp(48px, 8vw, 96px);
             font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 20px;
             letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .hero-title .accent {
-            color: var(--accent);
-            display: inline-block;
+
+        .light-mode .hero-title {
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .hero-subtitle {
-            font-size: 17px;
-            color: #888;
-            max-width: 420px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
-        
-        .light-mode .hero-subtitle {
-            color: #666;
-        }
-        
-        /* Portal Grid */
+
         .portal-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 64px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
         }
-        
-        @media (max-width: 900px) {
-            .portal-grid {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-                margin-left: auto;
-                margin-right: auto;
-                gap: 16px;
-                margin-bottom: 48px;
-            }
-        }
-        
+
         .portal-card {
-            position: relative;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 32px 28px;
             text-decoration: none;
             color: inherit;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
             overflow: hidden;
-            display: block;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            padding: 40px 32px;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
-        
-        .light-mode .portal-card {
-            background: rgba(255,255,255,0.7);
-            border-color: rgba(0,0,0,0.08);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
-        }
-        
-        .portal-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 50%, rgba(201, 169, 98, 0.08));
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        
+
         .portal-card:hover {
-            border-color: rgba(201, 169, 98, 0.5);
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
-        
-        .light-mode .portal-card:hover {
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .portal-card:hover::before {
-            opacity: 1;
-        }
-        
+
         .portal-icon {
             width: 64px;
             height: 64px;
             border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
             margin-bottom: 24px;
-            position: relative;
-            z-index: 1;
-            color: #fff;
-        }
-        
-        .portal-card:nth-child(1) .portal-icon {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            box-shadow: 0 12px 32px -8px rgba(34, 197, 94, 0.5);
-        }
-        
-        .portal-card:nth-child(2) .portal-icon {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            box-shadow: 0 12px 32px -8px rgba(249, 115, 22, 0.5);
-        }
-        
-        .portal-card:nth-child(3) .portal-icon {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 12px 32px -8px rgba(139, 92, 246, 0.5);
-        }
-        
-        .portal-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .light-mode .portal-label {
-            color: #999;
-        }
-        
-        .portal-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .portal-desc {
-            font-size: 14px;
-            color: #777;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .light-mode .portal-desc {
-            color: #666;
-        }
-        
-        .portal-arrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
             color: var(--accent);
-            position: relative;
-            z-index: 1;
-            transition: gap 0.3s ease;
+            transition: 0.3s;
+            border: 1px solid var(--border);
         }
-        
-        .portal-card:hover .portal-arrow {
-            gap: 14px;
-        }
-        
-        /* Quick Access */
-        .quick-section {
-            max-width: 520px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .quick-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 20px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-        
-        .light-mode .quick-title {
-            color: #888;
-        }
-        
-        .quick-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-        }
-        
-        @media (max-width: 480px) {
-            .quick-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        .quick-btn {
-            aspect-ratio: 1;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .light-mode .quick-btn {
-            background: rgba(255,255,255,0.8);
-            border-color: rgba(0,0,0,0.08);
-        }
-        
-        .quick-btn:hover {
+
+        .portal-card:hover .portal-icon {
             background: var(--accent);
-            border-color: var(--accent);
             color: #000;
-            transform: scale(1.08);
-            box-shadow: 0 8px 24px rgba(201, 169, 98, 0.4);
+            border-color: var(--accent);
+            transform: scale(1.1) rotate(-5deg);
         }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: #555;
-            font-size: 14px;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .light-mode .footer {
-            color: #888;
-        }
-        
-        .footer-hours {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            color: #777;
-            font-weight: 500;
-        }
-        
-        .light-mode .footer-hours {
-            color: #666;
-        }
-        
-        .footer-love {
+
+        .quick-access-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
         }
-        
-        .footer-love .heart {
-            color: #ef4444;
-            animation: heartbeat 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+
+        .quick-access-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+            background: var(--bg-card-hover);
         }
     </style>
 </head>
+
 <body>
-    <!-- Background Effects -->
     <div class="bg-pattern"></div>
     <div class="grain"></div>
-    
-    <!-- Header -->
-    <header class="header">
+
+    <!-- Standardized Header -->
+    <header class="header-glass">
         <div class="logo">
             <div class="logo-icon">☕</div>
-            <span class="logo-text"># 91 VRS</span>
+            <div class="logo-text"># 91 VRS</div>
         </div>
         <div class="header-actions">
-            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+            <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
                 <i class="ri-moon-line" id="themeIcon"></i>
             </button>
         </div>
     </header>
-    
-    <!-- Main Content -->
+
     <main class="main-container">
-        
-        <!-- Hero Section -->
+
+        <!-- Hero -->
         <section class="hero">
-            <div class="hero-badge">
-                <span class="pulse-dot"></span>
-                Now Open
+            <div class="badge badge-success"
+                style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; padding: 8px 16px; font-size: 13px;">
+                <span
+                    style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; animation: pulse-ring 2s infinite;"></span>
+                <span>Experience Luxury</span>
             </div>
-            <h1 class="hero-title">
-                <span class="accent"># 91</span> VRS Cafe
+
+            <h1 class="hero-title font-serif">
+                <span class="text-accent"># 91</span> VRS Cafe
             </h1>
-            <p class="hero-subtitle">
-                Where every sip tells a story and every bite creates a memory
+
+            <p class="text-muted" style="font-size: 18px; max-width: 480px; margin: 0 auto; line-height: 1.6;">
+                Where craftsmanship meets comfort. Experience the finest coffee and culinary delights in a space
+                designed for you.
             </p>
         </section>
-        
-        <!-- Portal Cards -->
+
+        <!-- Main Portals -->
         <section class="portal-grid">
-            
-            <!-- Customer Portal -->
+
+            <!-- Customer -->
             <a href="customer.html" class="portal-card">
-                <div class="portal-icon">
-                    <i class="ri-smartphone-line"></i>
-                </div>
-                <div class="portal-label">For Guests</div>
-                <h2 class="portal-title">Order Food</h2>
-                <p class="portal-desc">Browse our menu, customize your order, and track it in real-time</p>
-                <div class="portal-arrow">
+                <div class="portal-icon"><i class="ri-restaurant-2-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Order Food</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Browse our curated menu, customize your meals, and order directly from your table.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
                     Start Ordering <i class="ri-arrow-right-line"></i>
                 </div>
             </a>
-            
-            <!-- Kitchen Portal -->
+
+            <!-- Kitchen -->
             <a href="kitchen.html" class="portal-card">
-                <div class="portal-icon">
-                    <i class="ri-fire-line"></i>
-                </div>
-                <div class="portal-label">For Kitchen</div>
-                <h2 class="portal-title">Kitchen Display</h2>
-                <p class="portal-desc">View incoming orders, manage preparation, and update status</p>
-                <div class="portal-arrow">
-                    Open Kitchen <i class="ri-arrow-right-line"></i>
+                <div class="portal-icon"><i class="ri-fire-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Kitchen Display</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Real-time order management for chefs. Track preparation times and manage stock.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    Open KDS <i class="ri-arrow-right-line"></i>
                 </div>
             </a>
-            
-            <!-- Manager Portal -->
+
+            <!-- Admin -->
             <a href="admin.html" class="portal-card">
-                <div class="portal-icon">
-                    <i class="ri-dashboard-line"></i>
-                </div>
-                <div class="portal-label">For Staff</div>
-                <h2 class="portal-title">Manager Panel</h2>
-                <p class="portal-desc">Handle billing, manage tables, view reports, and control menu</p>
-                <div class="portal-arrow">
-                    Open Panel <i class="ri-arrow-right-line"></i>
+                <div class="portal-icon"><i class="ri-dashboard-3-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Manager Panel</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Complete control over sales, analytics, menu items, and table management.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    Access Dashboard <i class="ri-arrow-right-line"></i>
                 </div>
             </a>
-            
+
         </section>
-        
-        <!-- Quick Table Access -->
-        <section class="quick-section">
-            <h3 class="quick-title">Quick Table Access</h3>
-            <div class="quick-grid">
-                <a href="customer.html?table=1" class="quick-btn">1</a>
-                <a href="customer.html?table=2" class="quick-btn">2</a>
-                <a href="customer.html?table=3" class="quick-btn">3</a>
-                <a href="customer.html?table=4" class="quick-btn">4</a>
-                <a href="customer.html?table=5" class="quick-btn">5</a>
-                <a href="customer.html?table=6" class="quick-btn">6</a>
-                <a href="customer.html?table=7" class="quick-btn">7</a>
-                <a href="customer.html?table=8" class="quick-btn">8</a>
-                <a href="customer.html?table=9" class="quick-btn">9</a>
-                <a href="customer.html?table=10" class="quick-btn">10</a>
-                <a href="customer.html?table=11" class="quick-btn">11</a>
-                <a href="customer.html?table=12" class="quick-btn">12</a>
+
+        <!-- Quick Access -->
+        <section style="text-align: center; margin-bottom: 80px;">
+            <p class="text-muted"
+                style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; margin-bottom: 24px;">
+                Quick Table Access</p>
+            <div
+                style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 600px; margin: 0 auto;">
+                <script>
+                    for (let i = 1; i <= 12; i++) {
+                        document.write(`<a href="customer.html?table=${i}" class="quick-access-btn">${i}</a>`)
+                    }
+                </script>
             </div>
         </section>
-        
+
     </main>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-hours">
-            <i class="ri-time-line"></i>
-            Open Daily: 10:00 AM - 11:00 PM
-        </div>
-        <p class="footer-love">
-            Made with <span class="heart">❤️</span> for coffee lovers
-        </p>
+
+    <footer
+        style="text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px;">
+        <p style="margin-bottom: 8px;">&copy; 2026 # 91 VRS Cafe. All rights reserved.</p>
+        <p>Crafted with <span class="text-accent">♥</span> for excellence.</p>
     </footer>
-    
+
     <script src="data.js"></script>
     <script>
-        // Theme Management
+        function init() {
+            // Immediate Theme Check
+            const savedTheme = localStorage.getItem('vrs_theme');
+            if (savedTheme === 'light') document.body.classList.add('light-mode');
+            updateThemeIcon();
+        }
+
         function toggleTheme() {
+            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
+
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
+
+            setTimeout(() => {
+                document.body.classList.remove('switching-theme');
+            }, 300);
         }
-        
+
         function updateThemeIcon() {
-            const icon = document.getElementById('themeIcon');
             const isLight = document.body.classList.contains('light-mode');
-            icon.className = isLight ? 'ri-sun-line' : 'ri-moon-line';
+            document.getElementById('themeIcon').className = isLight ? 'ri-sun-line' : 'ri-moon-line';
         }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('vrs_theme');
-            if (saved === 'light') {
-                document.body.classList.add('light-mode');
-            }
-            updateThemeIcon();
-        });
+
+        // Run immediately
+        init();
     </script>
 </body>
+
 </html>
