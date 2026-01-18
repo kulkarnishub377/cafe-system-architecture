@@ -346,16 +346,21 @@
 
             const list = document.getElementById('trendingList');
             if (items.length === 0) {
-                list.innerHTML = `<div class="text-muted" style="padding:0 16px; font-size:14px;">No trending items matching logic.</div>`;
+                list.innerHTML = `<div class="text-muted" style="padding:0 16px; font-size:14px;">No trending items available.</div>`;
                 return;
             }
 
             list.innerHTML = items.map(item => `
-                <div class="menu-card" style="width: 160px; flex-shrink: 0; background: transparent;" onclick="addToCart(${item.id})">
-                    <img src="${item.image}" style="width: 100%; height: 160px; border-radius: 16px; object-fit: cover; margin-bottom: 8px;">
-                     <div class="badge badge-warning" style="position: absolute; top: 8px; left: 8px; font-size: 10px;">Hot</div>
-                    <div style="font-weight: 600; font-size: 14px;">${item.name}</div>
-                    <div class="text-accent" style="font-weight: 700;">₹${item.price}</div>
+                <div class="trending-card" onclick="addToCart(${item.id})">
+                    <div style="position: relative;">
+                        <img src="${item.image}" alt="${item.name}" 
+                             onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
+                        <div class="badge badge-warning" style="position: absolute; top: 8px; left: 8px; font-size: 10px;">🔥 Hot</div>
+                    </div>
+                    <div class="content">
+                        <div class="name">${item.name}</div>
+                        <div class="price">₹${item.price}</div>
+                    </div>
                 </div>
             `).join('');
         }

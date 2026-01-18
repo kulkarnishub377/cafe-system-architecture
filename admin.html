@@ -198,6 +198,73 @@
         <!-- Rendered by JS -->
     </aside>
 
+    <!-- Reports Modal -->
+    <div class="modal-overlay" id="reportsOverlay" onclick="hideReports()"></div>
+    <div class="modal modal-center" id="reportsModal"
+        style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="font-serif" style="font-size: 20px;"><i class="ri-bar-chart-2-line"
+                    style="margin-right: 8px;"></i>Sales Reports</h2>
+            <button class="btn-icon" onclick="hideReports()"><i class="ri-close-line"></i></button>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+            <!-- Date Filter -->
+            <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                <button class="btn btn-secondary report-filter active" data-filter="today"
+                    onclick="filterReports('today')">Today</button>
+                <button class="btn btn-secondary report-filter" data-filter="week" onclick="filterReports('week')">This
+                    Week</button>
+                <button class="btn btn-secondary report-filter" data-filter="month"
+                    onclick="filterReports('month')">This Month</button>
+                <button class="btn btn-secondary report-filter" data-filter="all" onclick="filterReports('all')">All
+                    Time</button>
+            </div>
+
+            <!-- Stats Summary -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <div class="card stat-card" style="padding: 16px;">
+                    <div class="stat-icon" style="width: 40px; height: 40px; font-size: 18px;"><i
+                            class="ri-money-dollar-circle-line"></i></div>
+                    <div class="stat-value" style="font-size: 24px;" id="reportRevenue">₹0</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="card stat-card" style="padding: 16px;">
+                    <div class="stat-icon" style="width: 40px; height: 40px; font-size: 18px;"><i
+                            class="ri-file-list-3-line"></i></div>
+                    <div class="stat-value" style="font-size: 24px;" id="reportOrders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="card stat-card" style="padding: 16px;">
+                    <div class="stat-icon" style="width: 40px; height: 40px; font-size: 18px;"><i
+                            class="ri-line-chart-line"></i></div>
+                    <div class="stat-value" style="font-size: 24px;" id="reportAvg">₹0</div>
+                    <div class="stat-label">Avg Order</div>
+                </div>
+                <div class="card stat-card" style="padding: 16px;">
+                    <div class="stat-icon" style="width: 40px; height: 40px; font-size: 18px;"><i
+                            class="ri-star-line"></i></div>
+                    <div class="stat-value" style="font-size: 24px;" id="reportTopItem">-</div>
+                    <div class="stat-label">Top Item</div>
+                </div>
+            </div>
+
+            <!-- Sales History Table -->
+            <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="font-serif" style="font-size: 18px;">Order History</h3>
+                <span class="badge badge-success" id="reportCount">0 orders</span>
+            </div>
+
+            <div id="reportsTableContainer"
+                style="border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+                <!-- Table rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+
     <!-- Menu Manager Modal -->
     <div class="modal-overlay" id="menuOverlay" onclick="hideMenuManager()"></div>
     <div class="modal modal-center" id="menuModal"
@@ -705,12 +772,125 @@
         }
 
         // --- Reports ---
-        function showReports() {
-            // Placeholder for future reports feature
-            const stats = DataStore.getTodayStats();
-            const history = DataStore.getSalesHistory();
+        let currentReportFilter = 'today';
 
-            alert(`📊 Quick Report\n\nToday's Revenue: ₹${stats.revenue}\nTotal Orders: ${stats.orders}\nActive Tables: ${stats.activeTables}\nAvg Order Value: ₹${stats.avgOrder}\n\nAll-Time Orders: ${history.length}`);
+        function showReports() {
+            document.getElementById('reportsOverlay').classList.add('show');
+            document.getElementById('reportsModal').classList.add('show');
+            filterReports('today');
+        }
+
+        function hideReports() {
+            document.getElementById('reportsOverlay').classList.remove('show');
+            document.getElementById('reportsModal').classList.remove('show');
+        }
+
+        function filterReports(filter) {
+            currentReportFilter = filter;
+
+            // Update filter button states
+            document.querySelectorAll('.report-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                }
+            });
+
+            const allHistory = DataStore.getSalesHistory();
+            const now = new Date();
+            const today = now.toDateString();
+
+            // Filter by date range
+            let filtered = allHistory.filter(sale => {
+                const saleDate = new Date(sale.closedTime);
+                switch (filter) {
+                    case 'today':
+                        return saleDate.toDateString() === today;
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return saleDate >= weekAgo;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        return saleDate >= monthAgo;
+                    default:
+                        return true;
+                }
+            });
+
+            // Calculate stats
+            const totalRevenue = filtered.reduce((sum, s) => sum + (s.total || 0), 0);
+            const totalOrders = filtered.length;
+            const avgOrder = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+            // Find top selling item
+            const itemCounts = {};
+            filtered.forEach(sale => {
+                sale.items.forEach(item => {
+                    itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+                });
+            });
+            const topItem = Object.keys(itemCounts).length > 0
+                ? Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0][0]
+                : '-';
+
+            // Update stats display
+            document.getElementById('reportRevenue').textContent = '₹' + totalRevenue.toLocaleString();
+            document.getElementById('reportOrders').textContent = totalOrders;
+            document.getElementById('reportAvg').textContent = '₹' + avgOrder;
+            document.getElementById('reportTopItem').textContent = topItem.length > 10 ? topItem.substring(0, 10) + '...' : topItem;
+            document.getElementById('reportCount').textContent = filtered.length + ' order' + (filtered.length !== 1 ? 's' : '');
+
+            // Render table
+            renderReportsTable(filtered.reverse());
+        }
+
+        function renderReportsTable(sales) {
+            const container = document.getElementById('reportsTableContainer');
+
+            if (sales.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.5;"></i>
+                        No orders found for this period
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="background: var(--bg-card-hover); text-align: left;">
+                            <th style="padding: 12px 16px; font-weight: 600; color: var(--text-muted);">Table</th>
+                            <th style="padding: 12px 16px; font-weight: 600; color: var(--text-muted);">Customer</th>
+                            <th style="padding: 12px 16px; font-weight: 600; color: var(--text-muted);">Items</th>
+                            <th style="padding: 12px 16px; font-weight: 600; color: var(--text-muted);">Amount</th>
+                            <th style="padding: 12px 16px; font-weight: 600; color: var(--text-muted);">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sales.map(sale => `
+                            <tr style="border-top: 1px solid var(--border);">
+                                <td style="padding: 12px 16px;">
+                                    <span style="background: var(--accent-light); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-weight: 600;">
+                                        Table ${sale.tableNum}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 16px;">${sale.customerName || 'Guest'}</td>
+                                <td style="padding: 12px 16px; color: var(--text-muted);">
+                                    ${sale.items.map(i => `${i.qty}x ${i.name}`).join(', ').substring(0, 50)}${sale.items.length > 2 ? '...' : ''}
+                                </td>
+                                <td style="padding: 12px 16px; font-weight: 700; color: var(--accent);">₹${sale.total}</td>
+                                <td style="padding: 12px 16px; color: var(--text-muted);">${formatDate(sale.closedTime)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
         }
 
         // --- Theme Icon Update ---
