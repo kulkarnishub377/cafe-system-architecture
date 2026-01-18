@@ -134,6 +134,9 @@
                     <input type="text" class="input" id="desktopCustName" placeholder="Your Name"
                         style="margin-bottom: 12px;">
 
+                    <textarea class="input" id="desktopCustNotes" placeholder="Any special requests? (e.g. less sugar)"
+                        style="min-height: 60px; resize: none; margin-bottom: 12px;"></textarea>
+
                     <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="placeOrder('desktop')">
                         Confirm Order <i class="ri-arrow-right-line"></i>
                     </button>
@@ -246,12 +249,10 @@
         }
 
         function toggleTheme() {
-            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
-            setTimeout(() => document.body.classList.remove('switching-theme'), 300);
         }
 
         function updateThemeIcon() {
@@ -394,8 +395,11 @@
                 return `
                 <div class="menu-card overflow-hidden" style="border-radius: 20px;">
                     <div class="menu-card-img" style="position: relative;">
-                        <img src="${item.image}" style="width: 100%; height: 100%; object-fit: cover;">
-                        <div class="add-btn-round" onclick="addToCart(${item.id})">
+                        <img src="${item.image}" 
+                             alt="${item.name}" 
+                             style="width: 100%; height: 100%; object-fit: cover;"
+                             onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
+                        <div class="add-btn-round" onclick="addToCart(${item.id})" aria-label="Add ${item.name} to cart">
                             <i class="ri-add-line"></i>
                         </div>
                     </div>
@@ -510,23 +514,43 @@
         }
 
         function placeOrder(source) {
-            if (cart.length === 0) return;
+            if (cart.length === 0) {
+                showToast('Your cart is empty!', 'warning');
+                return;
+            }
 
             // Handle different sources (Desktop vs Mobile inputs)
             const nameId = source === 'desktop' ? 'desktopCustName' : 'custName';
+            const notesId = source === 'desktop' ? 'desktopCustNotes' : 'custNotes';
 
-            const name = document.getElementById(nameId).value || 'Guest';
-            // Simple notes handling
-            const notes = document.getElementById('custNotes') ? document.getElementById('custNotes').value : '';
+            const name = document.getElementById(nameId).value.trim() || 'Guest';
+            const notesEl = document.getElementById(notesId);
+            const notes = notesEl ? notesEl.value.trim() : '';
+
+            // Calculate total for confirmation
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const itemCount = cart.reduce((s, i) => s + i.qty, 0);
+
+            // Confirmation dialog
+            if (!confirm(`Confirm order?\n\n${itemCount} item(s) - ₹${total}\nName: ${name}${notes ? '\nNotes: ' + notes : ''}`)) {
+                return;
+            }
 
             DataStore.createSession(currentTable, cart, name, notes);
             DataStore.addKitchenOrder(currentTable, cart, name, notes);
 
+            // Clear cart
             cart = [];
             updateCartUI();
             closeCart();
+
+            // Clear input fields
+            document.getElementById(nameId).value = '';
+            if (notesEl) notesEl.value = '';
+
             showOrders();
             createConfetti();
+            showToast('Order placed successfully! 🎉', 'success');
         }
 
         // Orders Logic
@@ -534,6 +558,45 @@
             document.getElementById('ordersOverlay').classList.add('show');
             document.getElementById('ordersModal').classList.add('show');
 
+            // Render initial status
+            renderOrderStatus();
+
+            // Start auto-refresh for real-time updates
+            startOrderAutoRefresh();
+        }
+
+        let orderRefreshInterval = null;
+
+        function closeOrders() {
+            document.getElementById('ordersOverlay').classList.remove('show');
+            document.getElementById('ordersModal').classList.remove('show');
+
+            // Stop auto-refresh when modal is closed
+            if (orderRefreshInterval) {
+                clearInterval(orderRefreshInterval);
+                orderRefreshInterval = null;
+            }
+        }
+
+        function startOrderAutoRefresh() {
+            // Clear any existing interval
+            if (orderRefreshInterval) {
+                clearInterval(orderRefreshInterval);
+            }
+
+            // Refresh order status every 5 seconds
+            orderRefreshInterval = setInterval(() => {
+                const modal = document.getElementById('ordersModal');
+                if (modal && modal.classList.contains('show')) {
+                    renderOrderStatus();
+                } else {
+                    clearInterval(orderRefreshInterval);
+                    orderRefreshInterval = null;
+                }
+            }, 5000);
+        }
+
+        function renderOrderStatus() {
             const session = DataStore.getSession(currentTable);
             const container = document.getElementById('ordersContent');
 
@@ -551,6 +614,11 @@
             }
 
             const steps = ['Order Received', 'Preparing', 'Ready to Serve'];
+            const statusMessages = [
+                'Your order has been sent to the kitchen!',
+                'Our chefs are preparing your meal with love ❤️',
+                'Your order is ready! It will be served shortly 🎉'
+            ];
 
             container.innerHTML = `
                 <div style="text-align: center; margin-bottom: 24px;">
@@ -588,14 +656,9 @@
                 </div>
                 
                 <p style="text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 12px;">
-                    Please wait while our chefs prepare your meal with love ❤️
+                    ${statusMessages[statusIdx]}
                 </p>
             `;
-        }
-
-        function closeOrders() {
-            document.getElementById('ordersOverlay').classList.remove('show');
-            document.getElementById('ordersModal').classList.remove('show');
         }
 
         function scrollToTop() {

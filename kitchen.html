@@ -204,15 +204,43 @@
         }
 
         function toggleTheme() {
-            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
-
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+            updateThemeIcon();
+        }
 
-            setTimeout(() => {
-                document.body.classList.remove('switching-theme');
-            }, 300);
+        function updateThemeIcon() {
+            const isLight = document.body.classList.contains('light-mode');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = isLight ? 'ri-sun-line' : 'ri-moon-line';
+        }
+
+        function updateStats() {
+            const orders = DataStore.getKitchenOrders();
+            const pending = orders.filter(o => o.status === 'pending').length;
+            const cooking = orders.filter(o => o.status === 'preparing').length;
+            const completed = orders.filter(o => o.status === 'completed');
+            const done = completed.length;
+
+            // Calculate average time for completed orders
+            let avgTime = 0;
+            if (completed.length > 0) {
+                const totalMinutes = completed.reduce((sum, o) => {
+                    if (o.completedTime) {
+                        const start = new Date(o.time).getTime();
+                        const end = new Date(o.completedTime).getTime();
+                        return sum + Math.floor((end - start) / 60000);
+                    }
+                    return sum;
+                }, 0);
+                avgTime = Math.round(totalMinutes / completed.length);
+            }
+
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statCooking').textContent = cooking;
+            document.getElementById('statDone').textContent = done;
+            document.getElementById('statAvgTime').textContent = avgTime + 'm';
         }
 
         function toggleSound() {

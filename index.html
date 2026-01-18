@@ -225,16 +225,10 @@
         }
 
         function toggleTheme() {
-            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
-
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
-
-            setTimeout(() => {
-                document.body.classList.remove('switching-theme');
-            }, 300);
         }
 
         function updateThemeIcon() {

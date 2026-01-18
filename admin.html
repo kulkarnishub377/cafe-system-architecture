@@ -111,23 +111,27 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-container" style="padding-top: 100px; max-width: 100%;">
+    <main class="main-container map-section" style="padding-top: 100px; max-width: 100%;">
 
         <!-- Stats -->
         <div class="stats-bar">
             <div class="card stat-card">
+                <div class="stat-icon"><i class="ri-money-dollar-circle-line"></i></div>
                 <div class="stat-value" id="statRevenue">₹0</div>
                 <div class="stat-label">Today's Revenue</div>
             </div>
             <div class="card stat-card">
+                <div class="stat-icon"><i class="ri-file-list-3-line"></i></div>
                 <div class="stat-value" id="statOrders">0</div>
                 <div class="stat-label">Total Orders</div>
             </div>
             <div class="card stat-card">
+                <div class="stat-icon"><i class="ri-group-line"></i></div>
                 <div class="stat-value" id="statActive">0</div>
                 <div class="stat-label">Active Tables</div>
             </div>
             <div class="card stat-card">
+                <div class="stat-icon"><i class="ri-line-chart-line"></i></div>
                 <div class="stat-value" id="statAvg">₹0</div>
                 <div class="stat-label">Avg Order Value</div>
             </div>
@@ -140,13 +144,13 @@
                     <h2 class="font-serif" style="font-size: 24px;">Floor Plan</h2>
                     <div style="display: flex; gap: 16px; font-size: 13px;">
                         <span style="display:flex; align-items:center; gap:6px;"><span
-                                style="width:8px; height:8px; background:var(--bg-card); border:1px solid var(--border); border-radius:50%;"></span>
+                                style="width:10px; height:10px; background:var(--bg-card); border:2px solid var(--border); border-radius:50%;"></span>
                             Free</span>
                         <span style="display:flex; align-items:center; gap:6px;"><span
-                                style="width:8px; height:8px; background:rgba(239, 68, 68, 0.2); border:1px solid #ef4444; border-radius:50%;"></span>
+                                style="width:10px; height:10px; background:rgba(239, 68, 68, 0.3); border:2px solid #ef4444; border-radius:50%;"></span>
                             Occupied</span>
                         <span style="display:flex; align-items:center; gap:6px;"><span
-                                style="width:8px; height:8px; background:rgba(245, 158, 11, 0.2); border:1px solid #f59e0b; border-radius:50%;"></span>
+                                style="width:10px; height:10px; background:rgba(245, 158, 11, 0.3); border:2px solid #f59e0b; border-radius:50%;"></span>
                             Billed</span>
                     </div>
                 </div>
@@ -156,15 +160,32 @@
                 </div>
             </div>
 
-            <!-- Live Activity -->
+            <!-- Live Activity & Active Orders -->
             <div style="flex: 1; min-width: 300px;">
-                <div class="card" style="height: 100%; min-height: 400px; display: flex; flex-direction: column;">
-                    <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+                <!-- Live Activity -->
+                <div class="card" style="margin-bottom: 20px;">
+                    <div
+                        style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
                         <h3 class="font-serif" style="font-size: 18px;">Live Activity</h3>
+                        <span class="badge badge-success" id="liveIndicator"
+                            style="animation: pulse-ring 2s infinite;">● Live</span>
                     </div>
                     <div id="activityFeed"
-                        style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+                        style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
                         <!-- Feed items -->
+                    </div>
+                </div>
+
+                <!-- Active Kitchen Orders -->
+                <div class="card">
+                    <div
+                        style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="font-serif" style="font-size: 18px;">Kitchen Queue</h3>
+                        <span class="badge badge-warning" id="kitchenCount">0 orders</span>
+                    </div>
+                    <div id="kitchenQueue"
+                        style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Kitchen orders -->
                     </div>
                 </div>
             </div>
@@ -280,29 +301,28 @@
             // Theme Check (Immediate)
             const savedTheme = localStorage.getItem('vrs_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
+            updateThemeIcon();
 
             renderFloorMap();
             updateStats();
             renderActivityFeed();
+            renderKitchenQueue();
 
-            // Auto refresh
+            // Auto refresh every 3 seconds for real-time feel
             setInterval(() => {
                 renderFloorMap();
                 updateStats();
-            }, 5000);
+                renderActivityFeed();
+                renderKitchenQueue();
+            }, 3000);
         }
 
         // --- Core Functions ---
         function toggleTheme() {
-            document.body.classList.add('switching-theme');
             document.body.classList.toggle('light-mode');
-
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
-
-            setTimeout(() => {
-                document.body.classList.remove('switching-theme');
-            }, 300);
+            updateThemeIcon();
         }
 
         function toggleSound() {
@@ -356,7 +376,7 @@
             }
 
             feed.innerHTML = history.reverse().map(sale => `
-                <div style="padding: 12px; background: var(--bg-card); border-radius: 12px; font-size: 13px;">
+                <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid var(--success);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                         <span style="font-weight: 600;">Table ${sale.tableNum}</span>
                         <span class="text-accent font-bold">₹${sale.total}</span>
@@ -367,6 +387,43 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        function renderKitchenQueue() {
+            const orders = DataStore.getKitchenOrders().filter(o => o.status !== 'completed');
+            const container = document.getElementById('kitchenQueue');
+            const countBadge = document.getElementById('kitchenCount');
+
+            countBadge.textContent = orders.length + ' order' + (orders.length !== 1 ? 's' : '');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);"><i class="ri-check-double-line" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>All orders complete!</div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const statusColor = order.status === 'pending' ? 'var(--warning)' : 'var(--accent)';
+                const statusIcon = order.status === 'pending' ? 'ri-time-line' : 'ri-fire-line';
+                const elapsed = getElapsedMinutes(order.time);
+
+                return `
+                    <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid ${statusColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700;">Table ${order.tableNum}</span>
+                            <span class="badge" style="background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40;">
+                                <i class="${statusIcon}" style="margin-right: 4px;"></i>${order.status.toUpperCase()}
+                            </span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
+                            ${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                            <span>${order.customerName || 'Guest'}</span>
+                            <span>${elapsed}m ago</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // --- Sidebar Logic ---
@@ -561,6 +618,106 @@
             hideSettings();
             renderFloorMap();
             showToast('Settings saved', 'success');
+        }
+
+        // --- Menu Item CRUD ---
+        let editingItemId = null;
+
+        function showAddItem() {
+            editingItemId = null;
+            document.getElementById('itemModalTitle').textContent = 'Add New Item';
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemEmoji').value = '';
+            document.getElementById('itemPrice').value = '';
+            document.getElementById('itemCat').value = 'coffee';
+            document.getElementById('itemVeg').checked = true;
+            document.getElementById('itemModal').classList.add('show');
+        }
+
+        function editItem(id) {
+            const item = DataStore.getMenuItems().find(i => i.id === id);
+            if (!item) return;
+
+            editingItemId = id;
+            document.getElementById('itemModalTitle').textContent = 'Edit Item';
+            document.getElementById('itemId').value = id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemEmoji').value = item.emoji || '';
+            document.getElementById('itemPrice').value = item.price;
+            document.getElementById('itemCat').value = item.category;
+            document.getElementById('itemVeg').checked = item.isVeg;
+            document.getElementById('itemModal').classList.add('show');
+        }
+
+        function deleteItem(id) {
+            if (confirm('Are you sure you want to delete this menu item?')) {
+                DataStore.deleteMenuItem(id);
+                renderMenuTable();
+                showToast('Item deleted successfully', 'success');
+            }
+        }
+
+        function saveItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const emoji = document.getElementById('itemEmoji').value.trim() || '🍽️';
+            const price = parseInt(document.getElementById('itemPrice').value);
+            const category = document.getElementById('itemCat').value;
+            const isVeg = document.getElementById('itemVeg').checked;
+
+            if (!name) {
+                showToast('Please enter item name', 'error');
+                return;
+            }
+
+            if (!price || price <= 0) {
+                showToast('Please enter valid price', 'error');
+                return;
+            }
+
+            if (editingItemId) {
+                // Update existing item
+                DataStore.updateMenuItem(editingItemId, { name, emoji, price, category, isVeg });
+                showToast('Item updated successfully', 'success');
+            } else {
+                // Add new item
+                DataStore.addMenuItem({
+                    name,
+                    emoji,
+                    price,
+                    category,
+                    isVeg,
+                    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+                    description: '',
+                    calories: 0,
+                    trending: false
+                });
+                showToast('Item added successfully', 'success');
+            }
+
+            hideItemModal();
+            renderMenuTable();
+        }
+
+        function hideItemModal() {
+            document.getElementById('itemModal').classList.remove('show');
+            editingItemId = null;
+        }
+
+        // --- Reports ---
+        function showReports() {
+            // Placeholder for future reports feature
+            const stats = DataStore.getTodayStats();
+            const history = DataStore.getSalesHistory();
+
+            alert(`📊 Quick Report\n\nToday's Revenue: ₹${stats.revenue}\nTotal Orders: ${stats.orders}\nActive Tables: ${stats.activeTables}\nAvg Order Value: ₹${stats.avgOrder}\n\nAll-Time Orders: ${history.length}`);
+        }
+
+        // --- Theme Icon Update ---
+        function updateThemeIcon() {
+            const isLight = document.body.classList.contains('light-mode');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = isLight ? 'ri-sun-line' : 'ri-moon-line';
         }
 
         init();

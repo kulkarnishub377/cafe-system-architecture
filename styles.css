@@ -1,54 +1,70 @@
 /* ============================================
-   # 91 VRS CAFE - LUXURY DESIGN SYSTEM
+   # 91 VRS CAFE - VIBRANT YOUTH DESIGN SYSTEM
    ============================================ */
 
-/* 1. VARIABLES & THEME */
+/* 1. VARIABLES & THEME - Electric Neon Vibes */
 :root {
-    /* Colors - Perfect Dark (OLED) */
-    --bg-dark: #000000;
-    /* True Black for OLED */
-    --bg-light: #ffffff;
+    /* Colors - Deep Purple/Cyan Gradient Theme */
+    --bg-dark: #0a0a1a;
+    /* Deep space blue-black */
+    --bg-light: #f8fafc;
 
-    /* Glass with subtle depth */
-    --bg-card: rgba(20, 20, 20, 0.6);
-    --bg-card-hover: rgba(40, 40, 40, 0.7);
-    --bg-glass: rgba(0, 0, 0, 0.85);
+    /* Glassmorphism with purple tint */
+    --bg-card: rgba(30, 20, 60, 0.7);
+    --bg-card-hover: rgba(50, 35, 90, 0.8);
+    --bg-glass: rgba(15, 10, 40, 0.9);
 
     --text-dark: #ffffff;
-    --text-light: #121212;
-    --text-muted: #a0a0a0;
+    --text-light: #1e1b4b;
+    --text-muted: #a5b4fc;
 
-    /* Neon Gold Polish */
-    --accent: #d4af37;
-    --accent-hover: #fcd34d;
-    --accent-glow: rgba(212, 175, 55, 0.5);
-    --accent-light: rgba(212, 175, 55, 0.1);
+    /* Electric Cyan/Purple Accent */
+    --accent: #06b6d4;
+    --accent-hover: #22d3ee;
+    --accent-glow: rgba(6, 182, 212, 0.5);
+    --accent-light: rgba(6, 182, 212, 0.15);
+
+    /* Secondary accent - Vibrant Pink */
+    --accent-secondary: #ec4899;
+    --accent-secondary-glow: rgba(236, 72, 153, 0.4);
 
     --success: #10b981;
     --success-glow: rgba(16, 185, 129, 0.4);
 
-    --danger: #ef4444;
+    --danger: #f43f5e;
     --warning: #f59e0b;
 
-    --border: rgba(255, 255, 255, 0.12);
-    --border-light: rgba(255, 255, 255, 0.2);
+    --border: rgba(139, 92, 246, 0.25);
+    --border-light: rgba(139, 92, 246, 0.4);
 
     /* Spacing */
     --header-height: 72px;
     --bottom-nav-height: 80px;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #ec4899 100%);
+    --gradient-card: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.05));
 }
 
-/* Light Mode Overrides */
+/* Light Mode - Fresh & Clean */
 [data-theme="light"],
 body.light-mode {
-    --bg-dark: #ffffff;
-    --text-dark: #000000;
-    --bg-card: #f5f5f5;
-    --bg-card-hover: #eeeeee;
-    --bg-glass: rgba(255, 255, 255, 0.95);
-    --border: rgba(0, 0, 0, 0.1);
-    --text-muted: #666666;
-    --accent: #c2950b;
+    --bg-dark: #f8fafc;
+    --text-dark: #1e1b4b;
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-card-hover: rgba(248, 250, 252, 1);
+    --bg-glass: rgba(255, 255, 255, 0.98);
+    --border: rgba(99, 102, 241, 0.25);
+    --border-light: rgba(99, 102, 241, 0.4);
+    --text-muted: #6366f1;
+    --accent: #7c3aed;
+    --accent-hover: #8b5cf6;
+    --accent-glow: rgba(124, 58, 237, 0.5);
+    --accent-light: rgba(124, 58, 237, 0.15);
+    --accent-secondary: #db2777;
+    --accent-secondary-glow: rgba(219, 39, 119, 0.4);
+    --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%);
+    --gradient-card: linear-gradient(145deg, rgba(124, 58, 237, 0.08), rgba(219, 39, 119, 0.04));
 }
 
 /* 2. RESET & BASE */
@@ -66,7 +82,8 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
-    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
+    /* Instant theme transition */
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 /* Typography */
@@ -80,31 +97,44 @@ h6,
     font-family: 'Playfair Display', serif;
 }
 
-/* 3. BACKGROUND EFFECTS */
+/* 3. BACKGROUND EFFECTS - Vibrant Animated Orbs */
 .bg-pattern {
     position: fixed;
     inset: 0;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(201, 169, 98, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(201, 169, 98, 0.06) 0%, transparent 40%);
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(99, 102, 241, 0.08) 0%, transparent 35%);
     pointer-events: none;
     z-index: -2;
+    animation: bgFloat 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgFloat {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1.1) rotate(3deg);
+    }
 }
 
 [data-theme="light"] .bg-pattern,
 body.light-mode .bg-pattern {
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(201, 169, 98, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 40%);
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 35%);
 }
 
 .grain {
     position: fixed;
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    opacity: 0.03;
+    opacity: 0.02;
     pointer-events: none;
     z-index: -1;
 }
@@ -146,21 +176,22 @@ body.light-mode .bg-pattern {
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     border: none;
     font-family: inherit;
     text-decoration: none;
+    font-size: 14px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-    color: #000;
-    box-shadow: 0 4px 15px rgba(201, 169, 98, 0.3);
+    background: var(--gradient-primary);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(201, 169, 98, 0.4);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.5);
 }
 
 .btn-secondary {
@@ -172,6 +203,7 @@ body.light-mode .bg-pattern {
 .btn-secondary:hover {
     background: var(--bg-card-hover);
     border-color: var(--accent);
+    color: var(--accent);
 }
 
 .btn-icon {
@@ -185,7 +217,7 @@ body.light-mode .bg-pattern {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-size: 20px;
 }
 
@@ -193,7 +225,7 @@ body.light-mode .bg-pattern {
 .btn-icon.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: #000;
+    color: #fff;
 }
 
 /* Cards */
@@ -549,30 +581,75 @@ body.light-mode .bg-pattern {
     animation: confetti-fall 3s linear forwards;
 }
 
+/* Pulse Ring Animation for Live Indicators */
+@keyframes pulse-ring {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
 /* Admin/Dashboard Specifics */
 .stat-card {
     text-align: center;
-    padding: 20px;
+    padding: 24px 20px;
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-card);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--accent);
 }
 
 .stat-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin: 8px 0;
 }
 
 .stat-label {
-    font-size: 13px;
+    font-size: 11px;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
 }
 
 .table-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 16px;
 }
 
@@ -583,25 +660,54 @@ body.light-mode .bg-pattern {
     align-items: center;
     justify-content: center;
     border: 2px solid var(--border);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    background: var(--bg-card);
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .table-card:hover {
     border-color: var(--accent);
-    background: var(--accent-light);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(6, 182, 212, 0.2);
+}
+
+.table-card:hover::before {
+    opacity: 0.1;
 }
 
 .table-card.occupied {
     border-color: var(--danger);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(244, 63, 94, 0.15);
+    animation: pulse-glow 2s infinite;
 }
 
 .table-card.billed {
     border-color: var(--warning);
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.15);
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(244, 63, 94, 0);
+    }
 }
 
 /* 9. MOBILE & YOUTH REFINEMENTS */
