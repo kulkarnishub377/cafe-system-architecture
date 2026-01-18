@@ -4,49 +4,51 @@
 
 /* 1. VARIABLES & THEME */
 :root {
-    /* Colors - Dark Mode (Default) */
-    --bg-dark: #050505;
-    /* Deepest Black */
+    /* Colors - Perfect Dark (OLED) */
+    --bg-dark: #000000;
+    /* True Black for OLED */
     --bg-light: #ffffff;
-    --bg-card: rgba(255, 255, 255, 0.04);
-    --bg-card-hover: rgba(255, 255, 255, 0.08);
-    --bg-glass: rgba(5, 5, 5, 0.7);
-    /* Darker glass */
+
+    /* Glass with subtle depth */
+    --bg-card: rgba(20, 20, 20, 0.6);
+    --bg-card-hover: rgba(40, 40, 40, 0.7);
+    --bg-glass: rgba(0, 0, 0, 0.85);
 
     --text-dark: #ffffff;
     --text-light: #121212;
-    --text-muted: #9ca3af;
+    --text-muted: #a0a0a0;
 
+    /* Neon Gold Polish */
     --accent: #d4af37;
-    /* Metal Gold */
-    --accent-hover: #bfa13a;
-    --accent-light: rgba(212, 175, 55, 0.15);
+    --accent-hover: #fcd34d;
+    --accent-glow: rgba(212, 175, 55, 0.5);
+    --accent-light: rgba(212, 175, 55, 0.1);
 
     --success: #10b981;
+    --success-glow: rgba(16, 185, 129, 0.4);
+
     --danger: #ef4444;
     --warning: #f59e0b;
-    --info: #3b82f6;
 
-    --border: rgba(255, 255, 255, 0.1);
-    --border-light: rgba(255, 255, 255, 0.15);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-light: rgba(255, 255, 255, 0.2);
 
     /* Spacing */
     --header-height: 72px;
+    --bottom-nav-height: 80px;
 }
 
 /* Light Mode Overrides */
 [data-theme="light"],
 body.light-mode {
-    --bg-dark: #faf9f6;
-    /* Off-white */
-    --text-dark: #121212;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f3f4f6;
-    --bg-glass: rgba(250, 249, 246, 0.85);
-    --border: rgba(0, 0, 0, 0.08);
-    --text-muted: #6b7280;
-    --bg-card: rgba(0, 0, 0, 0.03);
-    /* Slight grey for cards in light mode */
+    --bg-dark: #ffffff;
+    --text-dark: #000000;
+    --bg-card: #f5f5f5;
+    --bg-card-hover: #eeeeee;
+    --bg-glass: rgba(255, 255, 255, 0.95);
+    --border: rgba(0, 0, 0, 0.1);
+    --text-muted: #666666;
+    --accent: #c2950b;
 }
 
 /* 2. RESET & BASE */
@@ -64,7 +66,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
 }
 
 /* Typography */
@@ -404,12 +406,14 @@ body.light-mode .bg-pattern {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.6);
+    /* Slightly more transparent */
+    backdrop-filter: blur(16px);
+    /* Stronger premium blur */
     z-index: 200;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-overlay.show {
@@ -419,12 +423,13 @@ body.light-mode .bg-pattern {
 
 .modal {
     position: fixed;
-    background: var(--bg-dark);
-    /* Fallback */
-    background: linear-gradient(145deg, var(--bg-dark), #111);
+    background: var(--bg-card);
+    /* Consistent surface color */
     border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    /* Deep shadow */
     z-index: 201;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Bottom Sheet Modal (Mobile) */
@@ -714,4 +719,479 @@ body::before {
 
 body.switching-theme::before {
     opacity: 0.1;
+}
+
+
+/* 11. HORIZONTAL SCROLL (STORIES & TRENDING) */
+.story-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    /* Hide scrollbar spacing */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE */
+
+    /* Snap Logic */
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.story-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 72px;
+    /* Snap Config */
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+/* Ensure trending cards also snap */
+#trendingList {
+    scroll-padding: 0 50% 0 50%;
+    /* Optional: helps centering calculation */
+}
+
+#trendingList .menu-card {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    /* Force one-by-one stop */
+    margin: 0;
+    /* JS might have added margins, ensure they don't break calc */
+}
+
+.story-item:active {
+    transform: scale(0.9);
+}
+
+.story-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--accent);
+    padding: 2px;
+    /* Ring gap */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.story-circle.active {
+    box-shadow: 0 0 0 2px var(--bg-dark), 0 0 0 4px var(--accent);
+    background: var(--accent);
+    color: #000;
+}
+
+.story-item span {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Sticky Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 8px;
+}
+
+.nav-item i {
+    font-size: 24px;
+    margin-bottom: 2px;
+    transition: 0.3s;
+}
+
+.nav-item.active {
+    color: var(--accent);
+}
+
+.nav-item.active i {
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Clean Cart Floating */
+.cart-float {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + 16px);
+    left: 16px;
+    right: 16px;
+    background: var(--accent);
+    color: #000;
+    padding: 16px 24px;
+    border-radius: 100px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+    transform: translateY(200%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.cart-float.show {
+    transform: translateY(0);
+}
+
+/* Menu Card Polish */
+.menu-card {
+    border: none;
+    background: var(--bg-card);
+    position: relative;
+}
+
+.menu-card-img {
+    height: 200px;
+    /* Taller images */
+}
+
+.add-btn-round {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-btn-round:active {
+    transform: scale(0.8);
+}
+
+/* Order Progress */
+.progress-track {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    margin: 20px 0;
+}
+
+.progress-line {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+}
+
+.progress-fill {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    height: 2px;
+    background: var(--success);
+    z-index: 0;
+    width: 0%;
+    transition: width 1s ease;
+}
+
+.progress-step {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+
+/* 12. DESKTOP & PWA REFINEMENTS */
+
+/* Desktop Modal (Centered Popup) */
+@media (min-width: 768px) {
+    .modal-bottom {
+        bottom: auto;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        max-height: 85vh;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .modal-bottom.show {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Hide Mobile Bottom Nav on Desktop */
+    .bottom-nav {
+        display: none;
+    }
+
+    /* Adjust Container padding since bottom nav is gone */
+    .main-container {
+        padding-bottom: 40px;
+    }
+
+    body {
+        padding-bottom: 0 !important;
+        /* Override inline style */
+    }
+
+    /* Wider Grid for Desktop */
+    .grid-2 {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    /* Show more stories/categories */
+    .story-scroll {
+        justify-content: center;
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+}
+
+
+/* 13. MENU DETAILS & DESKTOP SPLIT */
+
+/* Dietary Icons */
+.diet-icon {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.diet-icon.veg {
+    border-color: var(--success);
+}
+
+.diet-icon.veg div {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+}
+
+.diet-icon.non-veg {
+    border-color: var(--danger);
+}
+
+.diet-icon.non-veg div {
+    width: 8px;
+    height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+}
+
+.calorie-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-card-hover);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+/* Desktop Split Layout */
+@media (min-width: 1024px) {
+    .desktop-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 32px;
+        align-items: start;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 32px;
+    }
+
+    .menu-section {
+        grid-column: 1;
+    }
+
+    /* Sticky Side Panel */
+    .side-panel {
+        position: sticky;
+        top: 100px;
+        /* Below header */
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 24px;
+        height: calc(100vh - 140px);
+        overflow-y: auto;
+        display: flex !important;
+        /* Force show on desktop */
+        flex-direction: column;
+    }
+
+    /* Hide the floating cart on desktop if side panel is visible */
+    .cart-float {
+        display: none !important;
+    }
+
+    /* Hide bottom nav on desktop, ensure header is used */
+    .bottom-nav {
+        display: none;
+    }
+
+    /* Ensure more columns in the menu grid */
+    .grid-2 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Utlity to hide side panel on mobile */
+.side-panel {
+    display: none;
+}
+
+/* 14. TOGGLE & POLISH */
+
+/* Veg Only Toggle */
+.filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: 0.3s;
+}
+
+.filter-toggle.active {
+    background: rgba(16, 185, 129, 0.15);
+    /* Green tint */
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.filter-toggle .toggle-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-dark);
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.filter-toggle.active .toggle-icon {
+    background: var(--success);
+    color: #fff;
+}
+
+/* FIX: Desktop Side Panel Flexbox */
+/* FIX: Desktop Side Panel Flexbox */
+@media (min-width: 1024px) {
+    .side-panel {
+        /* Existing: top: 100px; */
+        position: sticky;
+        top: 100px;
+        height: calc(100vh - 120px);
+        /* Fixed height constrained to viewport */
+        display: flex !important;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        /* Prevent outer scroll */
+    }
+}
+
+/* Scroll area for cart items */
+#desktopCartList {
+    flex: 1;
+    /* Grow to fill space */
+    overflow-y: auto;
+    /* Scroll internally */
+    min-height: 0;
+    /* Crucial for flex scrolling */
+    padding-right: 4px;
+    margin-bottom: 8px;
+    /* Space before footer */
+}
+
+/* Custom scrollbar for cart list */
+#desktopCartList::-webkit-scrollbar {
+    width: 4px;
+}
+
+#desktopCartList::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+/* Footer (Total + Button) stays fixed at bottom */
+.cart-footer {
+    flex-shrink: 0;
+    /* Never shrink */
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    z-index: 10;
 }
