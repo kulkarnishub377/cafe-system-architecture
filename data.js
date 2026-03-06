@@ -1,5 +1,5 @@
 // ============================================
-// SK Cafe CAFE - DATA MANAGEMENT SYSTEM
+// # SK cafe - DATA MANAGEMENT SYSTEM
 // ============================================
 
 // Theme Management
@@ -283,7 +283,7 @@ const DataStore = {
     // Settings
     getSettings() {
         const defaultSettings = {
-            cafeName: 'SK Cafe',
+            cafeName: '# SK cafe',
             phone: '+91 98765 43210',
             address: '123 Coffee Street, Bengaluru',
             gst: '29XXXXX1234X1ZX',

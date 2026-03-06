@@ -1,7 +1,7 @@
 """
 Django settings for cafe_backend project.
 
-SK Cafe - Backend API
+# SK cafe - Backend API
 """
 
 import os
@@ -162,13 +162,13 @@ REST_FRAMEWORK = {
 # drf-spectacular OpenAPI schema settings
 # -------------------------------------------------------------------
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'SK Cafe API',
+    'TITLE': '# SK cafe API',
     'VERSION': '2.0.0',
     'DESCRIPTION': (
-        'REST API for SK Cafe — menu management, table sessions, '
+        'REST API for # SK cafe — menu management, table sessions, '
         'kitchen orders, reservations, discounts, feedback and analytics.'
     ),
-    'CONTACT': {'name': 'SK Cafe', 'email': 'admin@skcafe.in'},
+    'CONTACT': {'name': '# SK cafe', 'email': 'admin@skcafe.in'},
     'LICENSE': {'name': 'Proprietary'},
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,

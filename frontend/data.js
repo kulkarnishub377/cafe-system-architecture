@@ -1,5 +1,5 @@
 // ============================================
-// SK Cafe CAFE - API DATA LAYER  v2.0
+// # SK cafe - API DATA LAYER  v2.0
 // Connects to Django REST Framework backend
 // ============================================
 

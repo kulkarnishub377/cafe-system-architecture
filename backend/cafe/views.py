@@ -1,5 +1,5 @@
 """
-ViewSets for SK Cafe API.
+ViewSets for # SK cafe API.
 
 All ViewSets use drf-spectacular @extend_schema decorators, proper
 select_related/prefetch_related for efficient querying, and return
@@ -146,6 +146,24 @@ class TableViewSet(ModelViewSet):
         from .utils import generate_qr_url
         base = request.build_absolute_uri('/').rstrip('/')
         return Response({'url': generate_qr_url(table.number, base_url=base)})
+
+    @extend_schema(summary='Get QR code image (base64 PNG) for a table', tags=['tables'])
+    @action(detail=True, methods=['get'], url_path='qr_code')
+    def qr_code(self, request, pk=None):
+        """Return the stored QR code data URI, generating it on-the-fly if not yet stored."""
+        from .utils import generate_qr_code_data_uri, generate_qr_url
+        table = self.get_object()
+        if not table.qr_code_data:
+            base = request.build_absolute_uri('/').rstrip('/')
+            url = generate_qr_url(table.number, base_url=base)
+            table.qr_code_url = url
+            table.qr_code_data = generate_qr_code_data_uri(url)
+            table.save(update_fields=['qr_code_url', 'qr_code_data', 'updated_at'])
+        return Response({
+            'table_number': table.number,
+            'qr_url': table.qr_code_url,
+            'qr_data_uri': table.qr_code_data,
+        })
 
 
 # ---------------------------------------------------------------------------
@@ -904,3 +922,103 @@ class CustomerViewSet(ViewSet):
         visit.preferred_name = name
         visit.save(update_fields=['preferred_name', 'last_seen'])
         return Response({'preferred_name': name, 'ip_address': ip})
+
+    @extend_schema(
+        summary='Personalised suggestions & behaviour profile (IP-based, no login)',
+        tags=['customer'],
+    )
+    @action(detail=False, methods=['get'], url_path='suggestions')
+    def suggestions(self, request):
+        """
+        Return a personalised experience payload for a returning customer.
+
+        Includes:
+        - welcome_message  – "Welcome back, <name>!" or "Welcome to # SK cafe!"
+        - is_returning     – True if customer has ordered before
+        - previous_orders  – last 5 closed orders for this IP
+        - reorder_items    – items from last order, ready to reorder
+        - top_picks        – customer's own top-3 most-ordered items
+        - trending_now     – top-3 globally trending items right now
+        - suggested_items  – merged personalised recommendation list
+        """
+        from collections import defaultdict
+
+        ip = self._get_client_ip(request)
+        visit, created = CustomerVisit.objects.get_or_create(ip_address=ip)
+
+        # Update visit count / last_seen
+        if not created:
+            visit.visit_count += 1
+            visit.save(update_fields=['visit_count', 'last_seen'])
+
+        # ------- History -------
+        past_records = list(
+            SalesRecord.objects.filter(ip_address=ip).order_by('-closed_at')[:5]
+        )
+        is_returning = len(past_records) > 0
+
+        # ------- Welcome message -------
+        name = visit.preferred_name or 'there'
+        if is_returning:
+            welcome_message = f'Welcome back, {name}! 👋 Great to see you again.'
+        else:
+            welcome_message = 'Welcome to # SK cafe! ☕ Explore our menu.'
+
+        # ------- Reorder (items from most recent order) -------
+        reorder_items = []
+        if past_records:
+            last_order = past_records[0]
+            reorder_items = [
+                {
+                    'id': item.get('id'),
+                    'name': item.get('name'),
+                    'price': item.get('price'),
+                    'qty': item.get('qty'),
+                }
+                for item in last_order.items_json
+            ]
+
+        # ------- Personal top picks (items ordered most across all history) -------
+        item_counts: dict[str, dict] = defaultdict(lambda: {'id': None, 'name': '', 'qty': 0, 'price': 0})
+        for record in SalesRecord.objects.filter(ip_address=ip).only('items_json'):
+            for item in record.items_json:
+                key = str(item.get('id', item.get('name', '')))
+                item_counts[key]['id'] = item.get('id')
+                item_counts[key]['name'] = item.get('name', key)
+                item_counts[key]['qty'] += item.get('qty', 0)
+                item_counts[key]['price'] = item.get('price', 0)
+        top_picks = sorted(item_counts.values(), key=lambda x: x['qty'], reverse=True)[:3]
+
+        # ------- Trending now (globally popular menu items) -------
+        trending_qs = MenuItem.objects.filter(
+            trending=True, in_stock=True, is_active=True
+        ).order_by('sort_order', 'name')[:3]
+        trending_now = [
+            {'id': m.id, 'name': m.name, 'price': m.price, 'emoji': m.emoji, 'category': m.category}
+            for m in trending_qs
+        ]
+
+        # ------- Merged suggestions (personal picks first, then trending) -------
+        seen_ids: set = {str(p['id']) for p in top_picks if p['id']}
+        suggested_items = list(top_picks)
+        for item in trending_now:
+            if str(item['id']) not in seen_ids:
+                suggested_items.append(item)
+                seen_ids.add(str(item['id']))
+        suggested_items = suggested_items[:6]
+
+        # ------- Previous orders summary -------
+        previous_orders = SalesRecordSerializer(past_records, many=True).data
+
+        return Response({
+            'ip_address': ip,
+            'is_returning': is_returning,
+            'visit_count': visit.visit_count,
+            'preferred_name': visit.preferred_name,
+            'welcome_message': welcome_message,
+            'reorder_items': reorder_items,
+            'top_picks': top_picks,
+            'trending_now': trending_now,
+            'suggested_items': suggested_items,
+            'previous_orders': previous_orders,
+        })

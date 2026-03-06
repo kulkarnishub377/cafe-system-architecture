@@ -1,4 +1,4 @@
-"""Utility helpers for SK Cafe backend."""
+"""Utility helpers for # SK cafe backend."""
 
 from __future__ import annotations
 

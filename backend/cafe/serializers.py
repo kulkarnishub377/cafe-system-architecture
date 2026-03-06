@@ -1,5 +1,5 @@
 """
-Serializers for SK Cafe API.
+Serializers for # SK cafe API.
 
 Naming convention:
   *Serializer      – read serializer (GET responses)
@@ -65,10 +65,10 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = [
             'id', 'number', 'capacity', 'location', 'status',
-            'qr_code_url', 'active_session_table_num', 'is_active',
+            'qr_code_url', 'qr_code_data', 'active_session_table_num', 'is_active',
             'created_at', 'updated_at',
         ]
-        read_only_fields = ['created_at', 'updated_at', 'active_session_table_num']
+        read_only_fields = ['created_at', 'updated_at', 'active_session_table_num', 'qr_code_data']
 
     def get_active_session_table_num(self, obj: Table) -> int | None:
         """Return the table_num if there is an active session on this table."""

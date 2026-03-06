@@ -1,5 +1,5 @@
 """
-Comprehensive test suite for SK Cafe API.
+Comprehensive test suite for # SK cafe API.
 
 Run with:
     python manage.py test cafe

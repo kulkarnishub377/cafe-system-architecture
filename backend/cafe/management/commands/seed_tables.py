@@ -1,6 +1,6 @@
 """
 Management command: seed_tables
-Creates 12 dining tables in the database for SK Cafe.
+Creates 12 dining tables in the database for # SK cafe.
 
 Usage:
     python manage.py seed_tables          # create only (skip if exists)
@@ -30,7 +30,7 @@ TABLE_DEFINITIONS = [
 class Command(BaseCommand):
     """Seed the database with the 12 standard dining tables."""
 
-    help = 'Seed the database with 12 dining tables for SK Cafe.'
+    help = 'Seed the database with 12 dining tables for # SK cafe.'
 
     def add_arguments(self, parser):
         """Add optional --reset flag."""

@@ -1,5 +1,5 @@
 """
-Django Admin configuration for SK Cafe.
+Django Admin configuration for # SK cafe.
 
 Provides professional list displays, inline admins, custom actions,
 and organised fieldsets for every model.
@@ -92,15 +92,126 @@ class MenuItemAdmin(admin.ModelAdmin):
 # Tables
 # ---------------------------------------------------------------------------
 
+_QR_PRINT_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>QR Codes – # SK cafe</title>
+<style>
+  body {{ font-family: Arial, sans-serif; }}
+  .grid {{ display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; }}
+  .card {{
+    border: 2px solid #333; border-radius: 12px;
+    padding: 16px; text-align: center; width: 200px;
+    page-break-inside: avoid;
+  }}
+  .card img {{ width: 160px; height: 160px; }}
+  .card h3 {{ margin: 8px 0 4px; font-size: 1.2rem; }}
+  .card p {{ margin: 0; font-size: 0.8rem; color: #555; word-break: break-all; }}
+  @media print {{ button {{ display: none; }} }}
+</style>
+</head>
+<body>
+<button onclick="window.print()" style="margin:16px;padding:8px 16px;font-size:1rem;">🖨️ Print All QR Codes</button>
+<div class="grid">
+{cards}
+</div>
+</body>
+</html>"""
+
+
 @admin.register(Table)
 class TableAdmin(admin.ModelAdmin):
-    """Admin for dining tables with quick status editing."""
+    """Admin for dining tables with QR code generation and printing."""
 
-    list_display = ('number', 'capacity', 'location', 'status', 'is_active')
+    list_display = ('number', 'capacity', 'location', 'status', 'has_qr_code', 'is_active')
     list_editable = ('status',)
     list_filter = ('status', 'location', 'is_active')
     search_fields = ('number', 'location')
     ordering = ('number',)
+    actions = ['generate_qr_codes', 'print_qr_codes', 'clear_qr_codes']
+    readonly_fields = ('qr_preview',)
+
+    fieldsets = (
+        ('Table Info', {
+            'fields': ('number', 'capacity', 'location', 'status', 'is_active'),
+        }),
+        ('QR Code', {
+            'fields': ('qr_code_url', 'qr_preview'),
+            'description': (
+                'Use the "Generate QR codes" action to create/refresh the QR code. '
+                'Scan the QR to open the customer ordering page for this table.'
+            ),
+        }),
+    )
+
+    def has_qr_code(self, obj: Table) -> bool:
+        """Show ✅ / ❌ depending on whether the QR code has been generated."""
+        return bool(obj.qr_code_data)
+    has_qr_code.boolean = True
+    has_qr_code.short_description = 'QR Ready'
+
+    def qr_preview(self, obj: Table):
+        """Render the stored QR code as an inline image in the admin change form."""
+        from django.utils.html import format_html
+        if not obj.qr_code_data:
+            return '—  (run "Generate QR codes" action to create)'
+        return format_html(
+            '<img src="{}" width="180" height="180" style="border:1px solid #ccc;border-radius:8px;" />',
+            obj.qr_code_data,
+        )
+    qr_preview.short_description = 'QR Code Preview'
+
+    # ------------------------------------------------------------------
+    # Admin actions
+    # ------------------------------------------------------------------
+
+    @admin.action(description='🔲 Generate / refresh QR codes for selected tables')
+    def generate_qr_codes(self, request: HttpRequest, queryset: QuerySet) -> None:
+        """Generate a QR code PNG for every selected table and store it as a data URI."""
+        from .utils import generate_qr_code_data_uri, generate_qr_url
+        base = request.build_absolute_uri('/').rstrip('/')
+        updated = 0
+        for table in queryset:
+            url = generate_qr_url(table.number, base_url=base)
+            table.qr_code_url = url
+            table.qr_code_data = generate_qr_code_data_uri(url)
+            table.save(update_fields=['qr_code_url', 'qr_code_data', 'updated_at'])
+            updated += 1
+        self.message_user(request, f'✅  Generated QR codes for {updated} table(s).')
+
+    @admin.action(description='🖨️  Print QR code sheet for selected tables')
+    def print_qr_codes(self, request: HttpRequest, queryset: QuerySet) -> None:
+        """Open a print-ready HTML page with QR codes for every selected table."""
+        from django.http import HttpResponse
+        from .utils import generate_qr_code_data_uri, generate_qr_url
+        base = request.build_absolute_uri('/').rstrip('/')
+        cards = []
+        for table in queryset.order_by('number'):
+            data_uri = table.qr_code_data
+            if not data_uri:
+                data_uri = generate_qr_code_data_uri(
+                    generate_qr_url(table.number, base_url=base)
+                )
+            cap_info = f'Capacity: {table.capacity}'
+            loc_info = table.location or ''
+            card = (
+                f'<div class="card">'
+                f'<img src="{data_uri}" alt="Table {table.number} QR" />'
+                f'<h3>Table {table.number}</h3>'
+                f'<p>{loc_info}</p>'
+                f'<p>{cap_info}</p>'
+                f'</div>'
+            )
+            cards.append(card)
+        html = _QR_PRINT_TEMPLATE.format(cards='\n'.join(cards))
+        return HttpResponse(html, content_type='text/html')
+
+    @admin.action(description='🗑️  Clear QR code data for selected tables')
+    def clear_qr_codes(self, request: HttpRequest, queryset: QuerySet) -> None:
+        """Remove stored QR code data from selected tables."""
+        updated = queryset.update(qr_code_data='', qr_code_url='')
+        self.message_user(request, f'Cleared QR data for {updated} table(s).')
 
 
 # ---------------------------------------------------------------------------

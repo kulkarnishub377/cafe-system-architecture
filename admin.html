@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager - SK Cafe</title>
+    <title>Manager - # SK cafe</title>
     <!-- Tailwind removed, using custom design system -->
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <link
@@ -83,7 +83,7 @@
         <div class="logo">
             <a href="index.html" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
                 <div class="logo-icon">☕</div>
-                <div class="logo-text">SK Cafe <span
+                <div class="logo-text"># SK cafe <span
                         style="font-size: 14px; opacity: 0.6; font-family: 'Inter', sans-serif;">Manager</span></div>
             </a>
         </div>
@@ -587,7 +587,7 @@
             const session = DataStore.getSession(tableNum);
             const printContent = `
                 <div style="text-align: center; font-family: monospace; padding: 20px;">
-                    <h2>SK Cafe</h2>
+                    <h2># SK cafe</h2>
                     <p>Table ${tableNum} • ${new Date().toLocaleString()}</p>
                     <hr>
                     ${session.items.map(i => `<div>${i.qty} x ${i.name} - ${i.price * i.qty}</div>`).join('')}

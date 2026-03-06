@@ -1,6 +1,6 @@
 {
-  "name": "SK Cafe",
-  "short_name": "SK Cafe",
+  "name": "# SK cafe",
+  "short_name": "# SK cafe",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",

@@ -1,4 +1,4 @@
-"""Custom API exceptions for SK Cafe."""
+"""Custom API exceptions for # SK cafe."""
 
 from rest_framework import status
 from rest_framework.exceptions import APIException

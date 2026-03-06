@@ -1,5 +1,5 @@
 """
-Models for SK Cafe.
+Models for # SK cafe.
 
 Hierarchy:
   BaseModel (abstract) → all domain models
@@ -430,7 +430,7 @@ class OrderFeedback(BaseModel):
 class CafeSettings(models.Model):
     """Singleton model for cafe-wide configuration (always pk=1)."""
 
-    cafe_name = models.CharField(max_length=200, default='SK Cafe')
+    cafe_name = models.CharField(max_length=200, default='# SK cafe')
     phone = models.CharField(max_length=30, default='+91 98765 43210')
     address = models.CharField(max_length=300, default='123 Coffee Street, Bengaluru')
     gst = models.CharField(max_length=30, default='29XXXXX1234X1ZX')
@@ -440,7 +440,7 @@ class CafeSettings(models.Model):
     closing_time = models.TimeField(default='23:00')
     currency_symbol = models.CharField(max_length=5, default='₹')
     footer_message = models.CharField(
-        max_length=300, default='Thank you for visiting SK Cafe!',
+        max_length=300, default='Thank you for visiting # SK cafe!',
     )
     upi_id = models.CharField(max_length=100, blank=True)
     instagram_url = models.CharField(max_length=200, blank=True)

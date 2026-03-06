@@ -1,5 +1,5 @@
 """
-Django signals for SK Cafe.
+Django signals for # SK cafe.
 
 Connected signals:
 - ``post_save`` on ``KitchenOrder`` → set ``estimated_minutes`` from item count.

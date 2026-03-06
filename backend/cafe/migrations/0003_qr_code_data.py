@@ -2,6 +2,25 @@
 
 from django.db import migrations, models
 
+# SQLite re-validates views when ALTER TABLE runs on a referenced table.
+# We drop v_table_status before the AddField and recreate it after.
+_V_TABLE_STATUS_SQL = """
+CREATE VIEW IF NOT EXISTS v_table_status AS
+SELECT
+    t.number,
+    t.capacity,
+    t.location,
+    t.status                       AS table_status,
+    s.customer_name,
+    s.start_time                   AS session_start,
+    ROUND(
+      (julianday('now') - julianday(s.start_time)) * 24 * 60
+    )                              AS minutes_occupied
+FROM cafe_table t
+LEFT JOIN cafe_tablesession s ON s.table_num = t.number
+ORDER BY t.number
+"""
+
 
 class Migration(migrations.Migration):
 
@@ -10,6 +29,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Drop the view that references cafe_table BEFORE altering the table,
+        # so SQLite does not fail view re-validation during ALTER TABLE.
+        migrations.RunSQL(
+            sql='DROP VIEW IF EXISTS v_table_status',
+            reverse_sql=migrations.RunSQL.noop,
+        ),
         migrations.AddField(
             model_name='table',
             name='qr_code_data',
@@ -18,11 +43,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cafesettings',
             name='cafe_name',
-            field=models.CharField(default='SK Cafe', max_length=200),
+            field=models.CharField(default='# SK cafe', max_length=200),
         ),
         migrations.AlterField(
             model_name='cafesettings',
             name='footer_message',
-            field=models.CharField(default='Thank you for visiting SK Cafe!', max_length=300),
+            field=models.CharField(default='Thank you for visiting # SK cafe!', max_length=300),
+        ),
+        # Recreate the view after the column has been added.
+        migrations.RunSQL(
+            sql=_V_TABLE_STATUS_SQL,
+            reverse_sql='DROP VIEW IF EXISTS v_table_status',
         ),
     ]
