@@ -1,5 +1,5 @@
 """
-Serializers for # 91 VRS Cafe API.
+Serializers for SK Cafe API.
 
 Naming convention:
   *Serializer      – read serializer (GET responses)

@@ -1,10 +1,10 @@
 // ============================================
-// # 91 VRS CAFE - API DATA LAYER  v2.0
+// SK Cafe CAFE - API DATA LAYER  v2.0
 // Connects to Django REST Framework backend
 // ============================================
 
 // Change this to your backend URL in production
-const API_BASE = (window.VRS_API_BASE || 'http://127.0.0.1:8000') + '/api';
+const API_BASE = (window.SK_API_BASE || 'http://127.0.0.1:8000') + '/api';
 
 // ---- low-level fetch helpers ----
 
@@ -254,7 +254,7 @@ const DataStore = {
 
 const ThemeManager = {
     init() {
-        const saved = localStorage.getItem('vrs_theme') || 'dark';
+        const saved = localStorage.getItem('sk_theme') || 'dark';
         this.set(saved);
     },
     get() {
@@ -262,7 +262,7 @@ const ThemeManager = {
     },
     set(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('vrs_theme', theme);
+        localStorage.setItem('sk_theme', theme);
     },
     toggle() {
         const current = this.get();
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
 
 
 // Change this to your backend URL in production
-const API_BASE = (window.VRS_API_BASE || 'http://127.0.0.1:8000') + '/api';
+const API_BASE = (window.SK_API_BASE || 'http://127.0.0.1:8000') + '/api';
 
 // ---- low-level fetch helpers ----
 
@@ -497,7 +497,7 @@ const DataStore = {
 
 const ThemeManager = {
     init() {
-        const saved = localStorage.getItem('vrs_theme') || 'dark';
+        const saved = localStorage.getItem('sk_theme') || 'dark';
         this.set(saved);
     },
     get() {
@@ -505,7 +505,7 @@ const ThemeManager = {
     },
     set(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('vrs_theme', theme);
+        localStorage.setItem('sk_theme', theme);
     },
     toggle() {
         const current = this.get();

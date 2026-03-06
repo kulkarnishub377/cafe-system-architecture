@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title># 91 VRS Cafe - Welcome</title>
+    <title>SK Cafe - Welcome</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -121,7 +121,7 @@
     <header class="header-glass">
         <div class="logo">
             <div class="logo-icon">☕</div>
-            <div class="logo-text"># 91 VRS</div>
+            <div class="logo-text">SK Cafe</div>
         </div>
         <div class="header-actions">
             <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
@@ -142,7 +142,7 @@
             </div>
 
             <h1 class="hero-title font-serif">
-                <span class="text-accent"># 91</span> VRS Cafe
+                <span class="text-accent"># 91</span> SK Cafe
             </h1>
 
             <p class="text-muted" style="font-size: 18px; max-width: 480px; margin: 0 auto; line-height: 1.6;">
@@ -211,7 +211,7 @@
 
     <footer
         style="text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px;">
-        <p style="margin-bottom: 8px;">&copy; 2026 # 91 VRS Cafe. All rights reserved.</p>
+        <p style="margin-bottom: 8px;">&copy; 2026 SK Cafe. All rights reserved.</p>
         <p>Crafted with <span class="text-accent">♥</span> for excellence.</p>
     </footer>
 
@@ -219,7 +219,7 @@
     <script>
         function init() {
             // Immediate Theme Check
-            const savedTheme = localStorage.getItem('vrs_theme');
+            const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
             updateThemeIcon();
         }
@@ -227,7 +227,7 @@
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('sk_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
         }
 

@@ -1,5 +1,5 @@
 -- ============================================================
--- # 91 VRS Cafe – Database Schema (SQLite-compatible SQL)
+-- SK Cafe – Database Schema (SQLite-compatible SQL)
 -- Generated from Django models for documentation purposes.
 -- For production use, run: python manage.py migrate
 -- ============================================================
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS cafe_staffprofile (
 -- Cafe Settings (singleton)
 CREATE TABLE IF NOT EXISTS cafe_cafesettings (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    cafe_name       VARCHAR(200) NOT NULL DEFAULT '# 91 VRS Cafe',
+    cafe_name       VARCHAR(200) NOT NULL DEFAULT 'SK Cafe',
     phone           VARCHAR(30),
     address         VARCHAR(300),
     gst             VARCHAR(30),

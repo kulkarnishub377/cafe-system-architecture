@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen Display - # 91 VRS Cafe</title>
+    <title>Kitchen Display - SK Cafe</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -190,7 +190,7 @@
 
         function init() {
             // Theme Check (Immediate)
-            const savedTheme = localStorage.getItem('vrs_theme');
+            const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
 
             renderOrders();
@@ -206,7 +206,7 @@
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('sk_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
         }
 

@@ -1,5 +1,5 @@
 """
-django-filter FilterSet classes for # 91 VRS Cafe API endpoints.
+django-filter FilterSet classes for SK Cafe API endpoints.
 
 Each FilterSet maps request query params to ORM lookups cleanly,
 keeping all filter logic out of the view layer.

@@ -1,5 +1,5 @@
 """
-Django signals for # 91 VRS Cafe.
+Django signals for SK Cafe.
 
 Connected signals:
 - ``post_save`` on ``KitchenOrder`` → set ``estimated_minutes`` from item count.

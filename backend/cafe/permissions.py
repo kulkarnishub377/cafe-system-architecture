@@ -1,5 +1,5 @@
 """
-Custom DRF permission classes for # 91 VRS Cafe.
+Custom DRF permission classes for SK Cafe.
 """
 from rest_framework.permissions import BasePermission
 

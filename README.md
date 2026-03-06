@@ -1,4 +1,4 @@
-# # 91 VRS Cafe – Full-Stack System  `v2.0`
+# SK Cafe – Full-Stack System  `v2.0`
 
 A complete **full-stack** cafe management system built by a senior developer with:
 

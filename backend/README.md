@@ -1,6 +1,6 @@
-# # 91 VRS Cafe – Django Backend API  `v2.0`
+# SK Cafe – Django Backend API  `v2.0`
 
-A **production-grade** Django REST Framework backend for the **# 91 VRS Cafe** management system, built to senior-developer standards.
+A **production-grade** Django REST Framework backend for the **SK Cafe** management system, built to senior-developer standards.
 
 ---
 
@@ -353,7 +353,7 @@ python manage.py test cafe -v 2     # verbose output
 - [ ] Set up periodic task to back up `db.sqlite3` (if using SQLite)
 
 
-This is the **Django REST Framework** backend for the **# 91 VRS Cafe** management system.
+This is the **Django REST Framework** backend for the **SK Cafe** management system.
 
 ## Features
 

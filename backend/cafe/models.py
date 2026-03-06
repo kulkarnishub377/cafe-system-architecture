@@ -1,5 +1,5 @@
 """
-Models for # 91 VRS Cafe.
+Models for SK Cafe.
 
 Hierarchy:
   BaseModel (abstract) → all domain models
@@ -108,6 +108,10 @@ class Table(BaseModel):
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     qr_code_url = models.CharField(max_length=500, blank=True, help_text='URL to the table QR code image')
+    qr_code_data = models.TextField(
+        blank=True,
+        help_text='Base64-encoded PNG of the QR code (data URI ready for <img src>)',
+    )
 
     class Meta:
         ordering = ['number']
@@ -426,7 +430,7 @@ class OrderFeedback(BaseModel):
 class CafeSettings(models.Model):
     """Singleton model for cafe-wide configuration (always pk=1)."""
 
-    cafe_name = models.CharField(max_length=200, default='# 91 VRS Cafe')
+    cafe_name = models.CharField(max_length=200, default='SK Cafe')
     phone = models.CharField(max_length=30, default='+91 98765 43210')
     address = models.CharField(max_length=300, default='123 Coffee Street, Bengaluru')
     gst = models.CharField(max_length=30, default='29XXXXX1234X1ZX')
@@ -436,7 +440,7 @@ class CafeSettings(models.Model):
     closing_time = models.TimeField(default='23:00')
     currency_symbol = models.CharField(max_length=5, default='₹')
     footer_message = models.CharField(
-        max_length=300, default='Thank you for visiting # 91 VRS Cafe!',
+        max_length=300, default='Thank you for visiting SK Cafe!',
     )
     upi_id = models.CharField(max_length=100, blank=True)
     instagram_url = models.CharField(max_length=200, blank=True)

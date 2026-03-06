@@ -1,5 +1,5 @@
 """
-ViewSets for # 91 VRS Cafe API.
+ViewSets for SK Cafe API.
 
 All ViewSets use drf-spectacular @extend_schema decorators, proper
 select_related/prefetch_related for efficient querying, and return

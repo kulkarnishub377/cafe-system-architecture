@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu - # 91 VRS Cafe</title>
+    <title>Menu - SK Cafe</title>
     <link rel="manifest" href="manifest.json">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -231,7 +231,7 @@
         // Init Logic
         async function init() {
             // Instant Theme Load
-            const savedTheme = localStorage.getItem('vrs_theme');
+            const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
             updateThemeIcon();
 
@@ -257,7 +257,7 @@
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('sk_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
         }
 

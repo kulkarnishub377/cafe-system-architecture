@@ -1,5 +1,5 @@
 """
-Django Admin configuration for # 91 VRS Cafe.
+Django Admin configuration for SK Cafe.
 
 Provides professional list displays, inline admins, custom actions,
 and organised fieldsets for every model.

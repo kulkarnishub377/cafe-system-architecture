@@ -78,8 +78,12 @@ SELECT
     SUM(discount_amount)   AS total_discounts
 FROM cafe_salesrecord
 GROUP BY date(closed_at)
-ORDER BY sale_date DESC;
-
+ORDER BY sale_date DESC
+""",
+            reverse_sql="DROP VIEW IF EXISTS v_daily_revenue",
+        ),
+        migrations.RunSQL(
+            sql="""
 CREATE VIEW IF NOT EXISTS v_popular_items AS
 SELECT
     json_extract(item.value, '$.name')              AS item_name,
@@ -92,8 +96,12 @@ SELECT
 FROM cafe_salesrecord,
      json_each(cafe_salesrecord.items_json) AS item
 GROUP BY json_extract(item.value, '$.name')
-ORDER BY total_qty_sold DESC;
-
+ORDER BY total_qty_sold DESC
+""",
+            reverse_sql="DROP VIEW IF EXISTS v_popular_items",
+        ),
+        migrations.RunSQL(
+            sql="""
 CREATE VIEW IF NOT EXISTS v_table_status AS
 SELECT
     t.number,
@@ -107,12 +115,8 @@ SELECT
     )                              AS minutes_occupied
 FROM cafe_table t
 LEFT JOIN cafe_tablesession s ON s.table_num = t.number
-ORDER BY t.number;
+ORDER BY t.number
 """,
-            reverse_sql="""
-DROP VIEW IF EXISTS v_table_status;
-DROP VIEW IF EXISTS v_popular_items;
-DROP VIEW IF EXISTS v_daily_revenue;
-""",
+            reverse_sql="DROP VIEW IF EXISTS v_table_status",
         ),
     ]

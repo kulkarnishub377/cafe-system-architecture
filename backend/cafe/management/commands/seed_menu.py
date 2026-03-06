@@ -1,6 +1,6 @@
 """
 Management command: seed_menu
-Seeds the database with the initial # 91 VRS Cafe menu items and default settings.
+Seeds the database with the initial SK Cafe menu items and default settings.
 
 Usage:
     python manage.py seed_menu          # create only (skip if exists)
@@ -131,7 +131,7 @@ MENU_ITEMS = [
 
 
 class Command(BaseCommand):
-    help = 'Seed the database with # 91 VRS Cafe menu items and default settings.'
+    help = 'Seed the database with SK Cafe menu items and default settings.'
 
     def add_arguments(self, parser):
         parser.add_argument(

@@ -1,5 +1,5 @@
 """
-Comprehensive test suite for # 91 VRS Cafe API.
+Comprehensive test suite for SK Cafe API.
 
 Run with:
     python manage.py test cafe
