@@ -188,18 +188,18 @@
     <script>
         let soundEnabled = true;
 
-        function init() {
+        async function init() {
             // Theme Check (Immediate)
             const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
 
-            renderOrders();
-            renderStockGrid();
-            updateStats();
+            await renderOrders();
+            await renderStockGrid();
+            await updateStats();
 
-            setInterval(() => {
-                renderOrders();
-                updateStats();
+            setInterval(async () => {
+                await renderOrders();
+                await updateStats();
             }, 3000);
         }
 
@@ -216,31 +216,32 @@
             if (icon) icon.className = isLight ? 'ri-sun-line' : 'ri-moon-line';
         }
 
-        function updateStats() {
-            const orders = DataStore.getKitchenOrders();
-            const pending = orders.filter(o => o.status === 'pending').length;
-            const cooking = orders.filter(o => o.status === 'preparing').length;
-            const completed = orders.filter(o => o.status === 'completed');
-            const done = completed.length;
+        async function updateStats() {
+            try {
+                const orders = await DataStore.getKitchenOrders();
+                const pending = orders.filter(o => o.status === 'pending').length;
+                const cooking = orders.filter(o => o.status === 'preparing').length;
+                const completed = orders.filter(o => o.status === 'completed');
+                const done = completed.length;
 
-            // Calculate average time for completed orders
-            let avgTime = 0;
-            if (completed.length > 0) {
-                const totalMinutes = completed.reduce((sum, o) => {
-                    if (o.completedTime) {
-                        const start = new Date(o.time).getTime();
-                        const end = new Date(o.completedTime).getTime();
-                        return sum + Math.floor((end - start) / 60000);
-                    }
-                    return sum;
-                }, 0);
-                avgTime = Math.round(totalMinutes / completed.length);
-            }
+                let avgTime = 0;
+                if (completed.length > 0) {
+                    const totalMinutes = completed.reduce((sum, o) => {
+                        if (o.completed_at) {
+                            const start = new Date(o.created_at).getTime();
+                            const end = new Date(o.completed_at).getTime();
+                            return sum + Math.floor((end - start) / 60000);
+                        }
+                        return sum;
+                    }, 0);
+                    avgTime = Math.round(totalMinutes / completed.length);
+                }
 
-            document.getElementById('statPending').textContent = pending;
-            document.getElementById('statCooking').textContent = cooking;
-            document.getElementById('statDone').textContent = done;
-            document.getElementById('statAvgTime').textContent = avgTime + 'm';
+                document.getElementById('statPending').textContent = pending;
+                document.getElementById('statCooking').textContent = cooking;
+                document.getElementById('statDone').textContent = done;
+                document.getElementById('statAvgTime').textContent = avgTime + 'm';
+            } catch (e) { /* ignore polling errors */ }
         }
 
         function toggleSound() {
@@ -249,81 +250,91 @@
             document.getElementById('soundBtn').classList.toggle('text-muted', !soundEnabled);
         }
 
-        function renderOrders() {
-            const orders = DataStore.getKitchenOrders()
-                .filter(o => o.status !== 'completed')
-                .sort((a, b) => new Date(a.time) - new Date(b.time));
+        async function renderOrders() {
+            try {
+                const orders = (await DataStore.getKitchenOrders())
+                    .filter(o => o.status !== 'completed')
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-            const grid = document.getElementById('ordersGrid');
-            const empty = document.getElementById('emptyState');
+                const grid = document.getElementById('ordersGrid');
+                const empty = document.getElementById('emptyState');
 
-            if (orders.length === 0) {
-                grid.innerHTML = '';
-                empty.classList.remove('hidden');
-                return;
-            }
+                if (orders.length === 0) {
+                    grid.innerHTML = '';
+                    empty.classList.remove('hidden');
+                    return;
+                }
 
-            empty.classList.add('hidden');
+                empty.classList.add('hidden');
 
-            grid.innerHTML = orders.map(order => {
-                const elapsed = getElapsedMinutes(order.time);
-                let statusClass = 'new';
-                if (order.status === 'preparing') statusClass = 'cooking';
-                if (elapsed > 15) statusClass = 'late';
+                grid.innerHTML = orders.map(order => {
+                    const elapsed = getElapsedMinutes(order.created_at);
+                    let statusClass = 'new';
+                    if (order.status === 'preparing') statusClass = 'cooking';
+                    if (elapsed > 15) statusClass = 'late';
 
-                return `
-                    <div class="card order-card ${statusClass}">
-                        <div class="order-header">
-                            <div>
-                                <h3 class="font-serif" style="font-size: 18px;">Table ${order.tableNum}</h3>
-                                <div class="order-time">${formatTime(order.time)} (${elapsed}m ago)</div>
-                            </div>
-                            <div class="badge ${order.status === 'pending' ? 'badge-warning' : 'badge-danger'}">
-                                ${order.status.toUpperCase()}
-                            </div>
-                        </div>
-                        
-                        <div class="order-items">
-                            ${order.items.map(item => `
-                                <div class="order-item">
-                                    <span style="font-weight: 600;">${item.qty}x ${item.name}</span>
-                                    ${item.qty > 1 ? `<span class="text-muted" style="font-size: 12px;">(₹${item.price})</span>` : ''}
+                    return `
+                        <div class="card order-card ${statusClass}">
+                            <div class="order-header">
+                                <div>
+                                    <h3 class="font-serif" style="font-size: 18px;">Table ${order.table_num}</h3>
+                                    <div class="order-time">${formatTime(order.created_at)} (${elapsed}m ago)</div>
                                 </div>
-                            `).join('')}
+                                <div class="badge ${order.status === 'pending' ? 'badge-warning' : 'badge-danger'}">
+                                    ${order.status.toUpperCase()}
+                                </div>
+                            </div>
                             
-                            ${order.notes ? `
-                                <div style="margin-top: 12px; padding: 8px; background: rgba(245, 158, 11, 0.1); border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #f59e0b;">
-                                    <strong>Note:</strong> ${order.notes}
-                                </div>
-                            ` : ''}
+                            <div class="order-items">
+                                ${order.items.map(item => `
+                                    <div class="order-item">
+                                        <span style="font-weight: 600;">${item.qty}x ${item.name}</span>
+                                        ${item.qty > 1 ? `<span class="text-muted" style="font-size: 12px;">(₹${item.price})</span>` : ''}
+                                    </div>
+                                `).join('')}
+                                
+                                ${order.special_instructions ? `
+                                    <div style="margin-top: 12px; padding: 8px; background: rgba(245, 158, 11, 0.1); border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #f59e0b;">
+                                        <strong>Note:</strong> ${order.special_instructions}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div style="margin-top: auto; display: flex; gap: 12px;">
+                                ${order.status === 'pending' ? `
+                                    <button onclick="startCooking(${order.id})" class="btn btn-primary" style="width: 100%;">
+                                        <i class="ri-fire-line"></i> Start Cooking
+                                    </button>
+                                ` : `
+                                    <button onclick="markDone(${order.id})" class="btn btn-success" style="width: 100%; background: #22c55e; color: #fff; border:none;">
+                                        <i class="ri-check-line"></i> Mark Done
+                                    </button>
+                                `}
+                            </div>
                         </div>
-                        
-                        <div style="margin-top: auto; display: flex; gap: 12px;">
-                            ${order.status === 'pending' ? `
-                                <button onclick="startCooking(${order.id})" class="btn btn-primary" style="width: 100%;">
-                                    <i class="ri-fire-line"></i> Start Cooking
-                                </button>
-                            ` : `
-                                <button onclick="markDone(${order.id})" class="btn btn-success" style="width: 100%; background: #22c55e; color: #fff; border:none;">
-                                    <i class="ri-check-line"></i> Mark Done
-                                </button>
-                            `}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch (e) { /* ignore polling errors */ }
         }
 
-        function startCooking(id) {
-            DataStore.updateOrderStatus(id, 'preparing');
-            renderOrders();
-            playNotification();
+        async function startCooking(id) {
+            try {
+                await DataStore.updateOrderStatus(id, 'preparing');
+                await renderOrders();
+                playNotification();
+            } catch (e) {
+                showToast('Failed to update status', 'error');
+            }
         }
 
-        function markDone(id) {
-            DataStore.updateOrderStatus(id, 'completed');
-            renderOrders();
-            playNotification();
+        async function markDone(id) {
+            try {
+                await DataStore.updateOrderStatus(id, 'completed');
+                await renderOrders();
+                playNotification();
+            } catch (e) {
+                showToast('Failed to update status', 'error');
+            }
         }
 
         function playNotification() {
@@ -335,28 +346,34 @@
             document.getElementById('stockPanel').classList.toggle('open');
         }
 
-        function renderStockGrid(search = '') {
-            let items = DataStore.getMenuItems();
-            if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
+        async function renderStockGrid(search = '') {
+            try {
+                let items = await DataStore.getMenuItems();
+                if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
 
-            document.getElementById('stockGrid').innerHTML = items.map(item => `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span>${item.emoji}</span>
-                        <span style="${!item.inStock ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${item.name}</span>
+                document.getElementById('stockGrid').innerHTML = items.map(item => `
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span>${item.emoji}</span>
+                            <span style="${!item.in_stock ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${item.name}</span>
+                        </div>
+                        <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
+                            <input type="checkbox" ${item.in_stock ? 'checked' : ''} onchange="toggleStock(${item.id})" style="opacity: 0; width: 0; height: 0;">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px;"></span>
+                            <span style="position: absolute; content: ''; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; transform: ${item.in_stock ? 'translateX(20px)' : 'translateX(0)'}; background-color: ${item.in_stock ? '#22c55e' : '#fff'};"></span>
+                        </label>
                     </div>
-                    <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
-                        <input type="checkbox" ${item.inStock ? 'checked' : ''} onchange="toggleStock(${item.id})" style="opacity: 0; width: 0; height: 0;">
-                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px;"></span>
-                        <span style="position: absolute; content: ''; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; transform: ${item.inStock ? 'translateX(20px)' : 'translateX(0)'}; background-color: ${item.inStock ? '#22c55e' : '#fff'};"></span>
-                    </label>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (e) { /* ignore */ }
         }
 
-        function toggleStock(id) {
-            DataStore.toggleStock(id);
-            renderStockGrid();
+        async function toggleStock(id) {
+            try {
+                await DataStore.toggleStock(id);
+                await renderStockGrid();
+            } catch (e) {
+                showToast('Failed to toggle stock', 'error');
+            }
         }
 
         init();

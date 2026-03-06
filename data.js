@@ -1,11 +1,11 @@
 // ============================================
-// # 91 VRS CAFE - DATA MANAGEMENT SYSTEM
+// # SK cafe - DATA MANAGEMENT SYSTEM
 // ============================================
 
 // Theme Management
 const ThemeManager = {
     init() {
-        const saved = localStorage.getItem('vrs_theme') || 'dark';
+        const saved = localStorage.getItem('sk_theme') || 'dark';
         this.set(saved);
     },
 
@@ -15,7 +15,7 @@ const ThemeManager = {
 
     set(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('vrs_theme', theme);
+        localStorage.setItem('sk_theme', theme);
     },
 
     toggle() {
@@ -283,7 +283,7 @@ const DataStore = {
     // Settings
     getSettings() {
         const defaultSettings = {
-            cafeName: '# 91 VRS Cafe',
+            cafeName: '# SK cafe',
             phone: '+91 98765 43210',
             address: '123 Coffee Street, Bengaluru',
             gst: '29XXXXX1234X1ZX',

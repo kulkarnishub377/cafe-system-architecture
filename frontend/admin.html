@@ -363,24 +363,30 @@
     <script>
         let selectedTable = null;
         let soundEnabled = true;
+        let cachedMenuItems = [];   // local menu cache for the item editor
+        let cachedSalesHistory = []; // local cache for reports
 
-        function init() {
+        async function init() {
             // Theme Check (Immediate)
             const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
             updateThemeIcon();
 
-            renderFloorMap();
-            updateStats();
-            renderActivityFeed();
-            renderKitchenQueue();
+            await Promise.all([
+                renderFloorMap(),
+                updateStats(),
+                renderActivityFeed(),
+                renderKitchenQueue(),
+            ]);
 
             // Auto refresh every 3 seconds for real-time feel
-            setInterval(() => {
-                renderFloorMap();
-                updateStats();
-                renderActivityFeed();
-                renderKitchenQueue();
+            setInterval(async () => {
+                await Promise.all([
+                    renderFloorMap(),
+                    updateStats(),
+                    renderActivityFeed(),
+                    renderKitchenQueue(),
+                ]);
             }, 3000);
         }
 
@@ -399,101 +405,108 @@
         }
 
         // --- Dashboard Renderers ---
-        function renderFloorMap() {
-            const sessions = DataStore.getSessions();
-            const settings = DataStore.getSettings();
-            const total = settings.totalTables || 12;
+        async function renderFloorMap() {
+            try {
+                const sessions = await DataStore.getSessions();
+                const settings = await DataStore.getSettings();
+                const total = settings.total_tables || 12;
 
-            const grid = document.getElementById('floorMap');
-            grid.innerHTML = '';
+                const grid = document.getElementById('floorMap');
+                grid.innerHTML = '';
 
-            for (let i = 1; i <= total; i++) {
-                const session = sessions[i];
-                const card = document.createElement('div');
-                card.className = `table-card ${session ? (session.billPrinted ? 'billed' : 'occupied') : ''}`;
-                card.onclick = () => openTable(i);
+                for (let i = 1; i <= total; i++) {
+                    const session = sessions.find(s => s.table_num === i);
+                    const card = document.createElement('div');
+                    card.className = `table-card ${session ? (session.bill_printed ? 'billed' : 'occupied') : ''}`;
+                    card.onclick = () => openTable(i);
 
-                let icon = session ? (session.billPrinted ? 'ri-bill-line' : 'ri-user-smile-line') : 'ri-checkbox-blank-circle-line';
-                let status = session ? (session.billPrinted ? 'Billed' : 'Occupied') : 'Available';
+                    let icon = session ? (session.bill_printed ? 'ri-bill-line' : 'ri-user-smile-line') : 'ri-checkbox-blank-circle-line';
+                    let status = session ? (session.bill_printed ? 'Billed' : 'Occupied') : 'Available';
 
-                card.innerHTML = `
-                    <i class="${icon}" style="font-size: 24px; margin-bottom: 8px; opacity: 0.8;"></i>
-                    <div style="font-weight: 700; font-size: 16px;">T ${i}</div>
-                    <div style="font-size: 11px; text-transform: uppercase; margin-top: 4px; opacity: 0.7;">${status}</div>
-                `;
-                grid.appendChild(card);
-            }
+                    card.innerHTML = `
+                        <i class="${icon}" style="font-size: 24px; margin-bottom: 8px; opacity: 0.8;"></i>
+                        <div style="font-weight: 700; font-size: 16px;">T ${i}</div>
+                        <div style="font-size: 11px; text-transform: uppercase; margin-top: 4px; opacity: 0.7;">${status}</div>
+                    `;
+                    grid.appendChild(card);
+                }
+            } catch (e) { /* ignore polling errors */ }
         }
 
-        function updateStats() {
-            const stats = DataStore.getTodayStats();
-            document.getElementById('statRevenue').textContent = '₹' + stats.revenue.toLocaleString();
-            document.getElementById('statOrders').textContent = stats.orders;
-            document.getElementById('statActive').textContent = stats.activeTables;
-            document.getElementById('statAvg').textContent = '₹' + stats.avgOrder;
+        async function updateStats() {
+            try {
+                const stats = await DataStore.getTodayStats();
+                document.getElementById('statRevenue').textContent = '₹' + stats.revenue.toLocaleString();
+                document.getElementById('statOrders').textContent = stats.orders;
+                document.getElementById('statActive').textContent = stats.active_tables;
+                document.getElementById('statAvg').textContent = '₹' + stats.avg_order;
+            } catch (e) { /* ignore */ }
         }
 
-        function renderActivityFeed() {
-            const history = DataStore.getSalesHistory().slice(0, 10);
-            const feed = document.getElementById('activityFeed');
+        async function renderActivityFeed() {
+            try {
+                const history = (await DataStore.getSalesHistory()).slice(0, 10);
+                const feed = document.getElementById('activityFeed');
 
-            if (history.length === 0) {
-                feed.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No activity today</div>';
-                return;
-            }
+                if (history.length === 0) {
+                    feed.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No activity today</div>';
+                    return;
+                }
 
-            feed.innerHTML = history.reverse().map(sale => `
-                <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid var(--success);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                        <span style="font-weight: 600;">Table ${sale.tableNum}</span>
-                        <span class="text-accent font-bold">₹${sale.total}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
-                        <span>${formatTime(sale.closedTime)}</span>
-                        <span>${sale.items.length} items</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderKitchenQueue() {
-            const orders = DataStore.getKitchenOrders().filter(o => o.status !== 'completed');
-            const container = document.getElementById('kitchenQueue');
-            const countBadge = document.getElementById('kitchenCount');
-
-            countBadge.textContent = orders.length + ' order' + (orders.length !== 1 ? 's' : '');
-
-            if (orders.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);"><i class="ri-check-double-line" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>All orders complete!</div>';
-                return;
-            }
-
-            container.innerHTML = orders.map(order => {
-                const statusColor = order.status === 'pending' ? 'var(--warning)' : 'var(--accent)';
-                const statusIcon = order.status === 'pending' ? 'ri-time-line' : 'ri-fire-line';
-                const elapsed = getElapsedMinutes(order.time);
-
-                return `
-                    <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid ${statusColor};">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-weight: 700;">Table ${order.tableNum}</span>
-                            <span class="badge" style="background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40;">
-                                <i class="${statusIcon}" style="margin-right: 4px;"></i>${order.status.toUpperCase()}
-                            </span>
+                feed.innerHTML = history.map(sale => `
+                    <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid var(--success);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-weight: 600;">Table ${sale.table_num}</span>
+                            <span class="text-accent font-bold">₹${sale.total}</span>
                         </div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
-                            ${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                            <span>${order.customerName || 'Guest'}</span>
-                            <span>${elapsed}m ago</span>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+                            <span>${formatTime(sale.closed_at)}</span>
+                            <span>${(sale.items_json || []).length} items</span>
                         </div>
                     </div>
-                `;
-            }).join('');
+                `).join('');
+            } catch (e) { /* ignore */ }
         }
 
-        // --- Sidebar Logic ---
+        async function renderKitchenQueue() {
+            try {
+                const orders = (await DataStore.getKitchenOrders()).filter(o => o.status !== 'completed');
+                const container = document.getElementById('kitchenQueue');
+                const countBadge = document.getElementById('kitchenCount');
+
+                countBadge.textContent = orders.length + ' order' + (orders.length !== 1 ? 's' : '');
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);"><i class="ri-check-double-line" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>All orders complete!</div>';
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => {
+                    const statusColor = order.status === 'pending' ? 'var(--warning)' : 'var(--accent)';
+                    const statusIcon = order.status === 'pending' ? 'ri-time-line' : 'ri-fire-line';
+                    const elapsed = getElapsedMinutes(order.created_at);
+
+                    return `
+                        <div style="padding: 12px; background: var(--bg-card-hover); border-radius: 12px; font-size: 13px; border-left: 3px solid ${statusColor};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-weight: 700;">Table ${order.table_num}</span>
+                                <span class="badge" style="background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40;">
+                                    <i class="${statusIcon}" style="margin-right: 4px;"></i>${order.status.toUpperCase()}
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
+                                ${(order.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                                <span>${order.customer_name || 'Guest'}</span>
+                                <span>${elapsed}m ago</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) { /* ignore */ }
+        }
+
         function openTable(num) {
             selectedTable = num;
             const sidebar = document.getElementById('tableSidebar');
@@ -509,117 +522,123 @@
             document.querySelector('.map-section').classList.remove('sidebar-open');
         }
 
-        function renderSidebar() {
+        async function renderSidebar() {
             const container = document.getElementById('tableSidebar');
             if (!selectedTable) return;
 
-            const session = DataStore.getSession(selectedTable);
+            try {
+                const session = await DataStore.getSession(selectedTable);
 
-            if (!session) {
+                if (!session) {
+                    container.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
+                            <button class="btn-icon" onclick="closeSidebar()"><i class="ri-close-line"></i></button>
+                        </div>
+                        <div style="text-align: center; padding: 40px 0; opacity: 0.5;">
+                            <i class="ri-armchair-line" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                            <p>Table is currently empty</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const subtotal = session.items.reduce((s, i) => s + i.price * i.qty, 0);
+                const gst = Math.round(subtotal * 0.05);
+
                 container.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
+                        <div>
+                            <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
+                            <div class="text-muted" style="font-size: 13px;">${session.customer_name || 'Guest'}</div>
+                        </div>
                         <button class="btn-icon" onclick="closeSidebar()"><i class="ri-close-line"></i></button>
                     </div>
-                    <div style="text-align: center; padding: 40px 0; opacity: 0.5;">
-                        <i class="ri-armchair-line" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
-                        <p>Table is currently empty</p>
+                    
+                    <div style="flex: 1; overflow-y: auto; margin-bottom: 24px;">
+                        ${session.items.map(item => `
+                            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                                <div>
+                                    <div style="font-weight: 600;">${item.qty}x ${item.name}</div>
+                                    <div class="text-muted" style="font-size: 12px;">₹${item.price}</div>
+                                </div>
+                                <div style="font-weight: 600;">₹${item.price * item.qty}</div>
+                            </div>
+                        `).join('')}
+                        
+                        <div style="margin-top: 20px; font-size: 14px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span class="text-muted">Subtotal</span>
+                                <span>₹${subtotal}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span class="text-muted">GST (5%)</span>
+                                <span>₹${gst}</span>
+                            </div>
+                            <div style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
+                                <span>Total</span>
+                                <span class="text-accent">₹${session.total}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; gap: 12px;">
+                        ${!session.bill_printed ? `
+                            <button onclick="printBill(${selectedTable})" class="btn btn-secondary w-full"><i class="ri-printer-line"></i> Print Bill</button>
+                        ` : `
+                            <div class="badge badge-warning" style="text-align: center; padding: 12px;">Bill Printed</div>
+                        `}
+                        <button onclick="settleTable(${selectedTable})" class="btn btn-primary w-full">Settle & Close</button>
                     </div>
                 `;
-                return;
+            } catch (e) {
+                container.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">Failed to load table.</div>`;
             }
-
-            const subtotal = session.items.reduce((s, i) => s + i.price * i.qty, 0);
-            const gst = Math.round(subtotal * 0.05);
-
-            container.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <div>
-                        <h2 class="font-serif" style="font-size: 24px;">Table ${selectedTable}</h2>
-                        <div class="text-muted" style="font-size: 13px;">${session.customerName || 'Guest'}</div>
-                    </div>
-                    <button class="btn-icon" onclick="closeSidebar()"><i class="ri-close-line"></i></button>
-                </div>
-                
-                <div style="flex: 1; overflow-y: auto; margin-bottom: 24px;">
-                    ${session.items.map(item => `
-                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
-                            <div>
-                                <div style="font-weight: 600;">${item.qty}x ${item.name}</div>
-                                <div class="text-muted" style="font-size: 12px;">₹${item.price}</div>
-                            </div>
-                            <div style="font-weight: 600;">₹${item.price * item.qty}</div>
-                        </div>
-                    `).join('')}
-                    
-                    <div style="margin-top: 20px; font-size: 14px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span class="text-muted">Subtotal</span>
-                            <span>₹${subtotal}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="text-muted">GST (5%)</span>
-                            <span>₹${gst}</span>
-                        </div>
-                        <div style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
-                            <span>Total</span>
-                            <span class="text-accent">₹${subtotal + gst}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: grid; gap: 12px;">
-                    ${!session.billPrinted ? `
-                        <button onclick="printBill(${selectedTable})" class="btn btn-secondary w-full"><i class="ri-printer-line"></i> Print Bill</button>
-                    ` : `
-                        <div class="badge badge-warning" style="text-align: center; padding: 12px;">Bill Printed</div>
-                    `}
-                    <button onclick="settleTable(${selectedTable})" class="btn btn-primary w-full">Settle & Close</button>
-                </div>
-            `;
         }
 
         // --- Actions ---
-        function printBill(tableNum) {
-            DataStore.markBillPrinted(tableNum);
+        async function printBill(tableNum) {
+            try {
+                await DataStore.markBillPrinted(tableNum);
+                const session = await DataStore.getSession(tableNum);
+                const printContent = `
+                    <div style="text-align: center; font-family: monospace; padding: 20px;">
+                        <h2># SK cafe</h2>
+                        <p>Table ${tableNum} • ${new Date().toLocaleString()}</p>
+                        <hr>
+                        ${session.items.map(i => `<div>${i.qty} x ${i.name} - ₹${i.price * i.qty}</div>`).join('')}
+                        <hr>
+                        <h3>Total: ₹${session.total}</h3>
+                    </div>
+                `;
+                const printWindow = window.open('', '', 'width=400,height=600');
+                printWindow.document.write(printContent);
+                printWindow.print();
+                printWindow.close();
 
-            // Mock Print Logic
-            const session = DataStore.getSession(tableNum);
-            const printContent = `
-                <div style="text-align: center; font-family: monospace; padding: 20px;">
-                    <h2># SK cafe</h2>
-                    <p>Table ${tableNum} • ${new Date().toLocaleString()}</p>
-                    <hr>
-                    ${session.items.map(i => `<div>${i.qty} x ${i.name} - ${i.price * i.qty}</div>`).join('')}
-                    <hr>
-                    <h3>Total: ₹${session.items.reduce((s, i) => s + i.price * i.qty, 0)}</h3>
-                </div>
-            `;
-
-            const printWindow = window.open('', '', 'width=400,height=600');
-            printWindow.document.write(printContent);
-            printWindow.print();
-            printWindow.close();
-
-            renderFloorMap();
-            renderSidebar();
+                await renderFloorMap();
+                await renderSidebar();
+            } catch (e) {
+                showToast('Failed to print bill: ' + e.message, 'error');
+            }
         }
 
-        function settleTable(tableNum) {
+        async function settleTable(tableNum) {
             if (confirm(`Settle bill for Table ${tableNum}?`)) {
-                DataStore.closeSession(tableNum);
-                closeSidebar();
-                renderFloorMap();
-                updateStats();
-                showToast('Table settled successfully', 'success');
+                try {
+                    await DataStore.closeSession(tableNum);
+                    closeSidebar();
+                    await renderFloorMap();
+                    await updateStats();
+                    showToast('Table settled successfully', 'success');
+                } catch (e) {
+                    showToast('Failed to settle table: ' + e.message, 'error');
+                }
             }
         }
 
         function clearAllData() {
-            if (confirm('Are you sure? This will wipe all data.')) {
-                DataStore.clearAll();
-                window.location.reload();
-            }
+            showToast('Use the Django admin panel to manage data.', 'info');
         }
 
         // --- Menu Manager ---
@@ -634,20 +653,37 @@
             document.getElementById('menuModal').classList.remove('show');
         }
 
-        function renderMenuTable(search = '') {
-            let items = DataStore.getMenuItems();
-            if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
+        async function renderMenuTable(search = '') {
+            try {
+                cachedMenuItems = await DataStore.getMenuItems();
+                let items = cachedMenuItems;
+                if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
 
-            const container = document.getElementById('menuTableContainer');
-            if (items.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center p-4">No items found</p>';
-                return;
+                const container = document.getElementById('menuTableContainer');
+                if (items.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center p-4">No items found</p>';
+                    return;
+                }
+
+                container.innerHTML = items.map(item => `
+                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px;">
+                         <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 24px;">${item.emoji}</span>
+                            <div>
+                                <div style="font-weight: 600;">${item.name}</div>
+                                <div class="text-muted" style="font-size: 12px;">₹${item.price} • ${item.category}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-icon" style="width: 32px; height: 32px;" onclick="editItem(${item.id})"><i class="ri-edit-line"></i></button>
+                            <button class="btn-icon" style="width: 32px; height: 32px; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" onclick="deleteItem(${item.id})"><i class="ri-delete-bin-line"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                showToast('Failed to load menu items', 'error');
             }
-
-            container.innerHTML = items.map(item => `
-                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px;">
-                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 24px;">${item.emoji}</span>
+        }
                         <div>
                             <div style="font-weight: 600;">${item.name}</div>
                             <div class="text-muted" style="font-size: 12px;">₹${item.price} • ${item.category}</div>
@@ -662,13 +698,17 @@
         }
 
         // --- Settings ---
-        function showSettings() {
-            const s = DataStore.getSettings();
-            document.getElementById('settingName').value = s.cafeName;
-            document.getElementById('settingTax').value = s.taxRate;
-            document.getElementById('settingTables').value = s.totalTables;
-            document.getElementById('settingsOverlay').classList.add('show');
-            document.getElementById('settingsModal').classList.add('show');
+        async function showSettings() {
+            try {
+                const s = await DataStore.getSettings();
+                document.getElementById('settingName').value = s.cafe_name;
+                document.getElementById('settingTax').value = s.tax_rate;
+                document.getElementById('settingTables').value = s.total_tables;
+                document.getElementById('settingsOverlay').classList.add('show');
+                document.getElementById('settingsModal').classList.add('show');
+            } catch (e) {
+                showToast('Failed to load settings', 'error');
+            }
         }
 
         function hideSettings() {
@@ -676,15 +716,19 @@
             document.getElementById('settingsModal').classList.remove('show');
         }
 
-        function saveSettings() {
-            DataStore.saveSettings({
-                cafeName: document.getElementById('settingName').value,
-                taxRate: parseInt(document.getElementById('settingTax').value),
-                totalTables: parseInt(document.getElementById('settingTables').value)
-            });
-            hideSettings();
-            renderFloorMap();
-            showToast('Settings saved', 'success');
+        async function saveSettings() {
+            try {
+                await DataStore.saveSettings({
+                    cafe_name: document.getElementById('settingName').value,
+                    tax_rate: parseFloat(document.getElementById('settingTax').value),
+                    total_tables: parseInt(document.getElementById('settingTables').value),
+                });
+                hideSettings();
+                await renderFloorMap();
+                showToast('Settings saved', 'success');
+            } catch (e) {
+                showToast('Failed to save settings: ' + e.message, 'error');
+            }
         }
 
         // --- Menu Item CRUD ---
@@ -703,7 +747,7 @@
         }
 
         function editItem(id) {
-            const item = DataStore.getMenuItems().find(i => i.id === id);
+            const item = cachedMenuItems.find(i => i.id === id);
             if (!item) return;
 
             editingItemId = id;
@@ -713,24 +757,28 @@
             document.getElementById('itemEmoji').value = item.emoji || '';
             document.getElementById('itemPrice').value = item.price;
             document.getElementById('itemCat').value = item.category;
-            document.getElementById('itemVeg').checked = item.isVeg;
+            document.getElementById('itemVeg').checked = item.is_veg;
             document.getElementById('itemModal').classList.add('show');
         }
 
-        function deleteItem(id) {
+        async function deleteItem(id) {
             if (confirm('Are you sure you want to delete this menu item?')) {
-                DataStore.deleteMenuItem(id);
-                renderMenuTable();
-                showToast('Item deleted successfully', 'success');
+                try {
+                    await DataStore.deleteMenuItem(id);
+                    await renderMenuTable();
+                    showToast('Item deleted successfully', 'success');
+                } catch (e) {
+                    showToast('Failed to delete item: ' + e.message, 'error');
+                }
             }
         }
 
-        function saveItem() {
+        async function saveItem() {
             const name = document.getElementById('itemName').value.trim();
             const emoji = document.getElementById('itemEmoji').value.trim() || '🍽️';
             const price = parseInt(document.getElementById('itemPrice').value);
             const category = document.getElementById('itemCat').value;
-            const isVeg = document.getElementById('itemVeg').checked;
+            const is_veg = document.getElementById('itemVeg').checked;
 
             if (!name) {
                 showToast('Please enter item name', 'error');
@@ -742,28 +790,31 @@
                 return;
             }
 
-            if (editingItemId) {
-                // Update existing item
-                DataStore.updateMenuItem(editingItemId, { name, emoji, price, category, isVeg });
-                showToast('Item updated successfully', 'success');
-            } else {
-                // Add new item
-                DataStore.addMenuItem({
-                    name,
-                    emoji,
-                    price,
-                    category,
-                    isVeg,
-                    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
-                    description: '',
-                    calories: 0,
-                    trending: false
-                });
-                showToast('Item added successfully', 'success');
-            }
+            try {
+                if (editingItemId) {
+                    await DataStore.updateMenuItem(editingItemId, { name, emoji, price, category, is_veg });
+                    showToast('Item updated successfully', 'success');
+                } else {
+                    await DataStore.addMenuItem({
+                        name,
+                        emoji,
+                        price,
+                        category,
+                        is_veg,
+                        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+                        description: '',
+                        calories: 0,
+                        trending: false,
+                        in_stock: true,
+                    });
+                    showToast('Item added successfully', 'success');
+                }
 
-            hideItemModal();
-            renderMenuTable();
+                hideItemModal();
+                await renderMenuTable();
+            } catch (e) {
+                showToast('Failed to save item: ' + e.message, 'error');
+            }
         }
 
         function hideItemModal() {
@@ -785,7 +836,7 @@
             document.getElementById('reportsModal').classList.remove('show');
         }
 
-        function filterReports(filter) {
+        async function filterReports(filter) {
             currentReportFilter = filter;
 
             // Update filter button states
@@ -800,52 +851,51 @@
                 }
             });
 
-            const allHistory = DataStore.getSalesHistory();
-            const now = new Date();
-            const today = now.toDateString();
+            try {
+                cachedSalesHistory = await DataStore.getSalesHistory();
+                const now = new Date();
+                const today = now.toDateString();
 
-            // Filter by date range
-            let filtered = allHistory.filter(sale => {
-                const saleDate = new Date(sale.closedTime);
-                switch (filter) {
-                    case 'today':
-                        return saleDate.toDateString() === today;
-                    case 'week':
-                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        return saleDate >= weekAgo;
-                    case 'month':
-                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                        return saleDate >= monthAgo;
-                    default:
-                        return true;
-                }
-            });
-
-            // Calculate stats
-            const totalRevenue = filtered.reduce((sum, s) => sum + (s.total || 0), 0);
-            const totalOrders = filtered.length;
-            const avgOrder = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
-
-            // Find top selling item
-            const itemCounts = {};
-            filtered.forEach(sale => {
-                sale.items.forEach(item => {
-                    itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+                let filtered = cachedSalesHistory.filter(sale => {
+                    const saleDate = new Date(sale.closed_at);
+                    switch (filter) {
+                        case 'today':
+                            return saleDate.toDateString() === today;
+                        case 'week':
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            return saleDate >= weekAgo;
+                        case 'month':
+                            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            return saleDate >= monthAgo;
+                        default:
+                            return true;
+                    }
                 });
-            });
-            const topItem = Object.keys(itemCounts).length > 0
-                ? Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0][0]
-                : '-';
 
-            // Update stats display
-            document.getElementById('reportRevenue').textContent = '₹' + totalRevenue.toLocaleString();
-            document.getElementById('reportOrders').textContent = totalOrders;
-            document.getElementById('reportAvg').textContent = '₹' + avgOrder;
-            document.getElementById('reportTopItem').textContent = topItem.length > 10 ? topItem.substring(0, 10) + '...' : topItem;
-            document.getElementById('reportCount').textContent = filtered.length + ' order' + (filtered.length !== 1 ? 's' : '');
+                const totalRevenue = filtered.reduce((sum, s) => sum + (s.total || 0), 0);
+                const totalOrders = filtered.length;
+                const avgOrder = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
-            // Render table
-            renderReportsTable(filtered.reverse());
+                const itemCounts = {};
+                filtered.forEach(sale => {
+                    (sale.items_json || []).forEach(item => {
+                        itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+                    });
+                });
+                const topItem = Object.keys(itemCounts).length > 0
+                    ? Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0][0]
+                    : '-';
+
+                document.getElementById('reportRevenue').textContent = '₹' + totalRevenue.toLocaleString();
+                document.getElementById('reportOrders').textContent = totalOrders;
+                document.getElementById('reportAvg').textContent = '₹' + avgOrder;
+                document.getElementById('reportTopItem').textContent = topItem.length > 10 ? topItem.substring(0, 10) + '...' : topItem;
+                document.getElementById('reportCount').textContent = filtered.length + ' order' + (filtered.length !== 1 ? 's' : '');
+
+                renderReportsTable(filtered.slice().reverse());
+            } catch (e) {
+                showToast('Failed to load reports', 'error');
+            }
         }
 
         function renderReportsTable(sales) {
@@ -877,15 +927,15 @@
                             <tr style="border-top: 1px solid var(--border);">
                                 <td style="padding: 12px 16px;">
                                     <span style="background: var(--accent-light); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-weight: 600;">
-                                        Table ${sale.tableNum}
+                                        Table ${sale.table_num}
                                     </span>
                                 </td>
-                                <td style="padding: 12px 16px;">${sale.customerName || 'Guest'}</td>
+                                <td style="padding: 12px 16px;">${sale.customer_name || 'Guest'}</td>
                                 <td style="padding: 12px 16px; color: var(--text-muted);">
-                                    ${sale.items.map(i => `${i.qty}x ${i.name}`).join(', ').substring(0, 50)}${sale.items.length > 2 ? '...' : ''}
+                                    ${(sale.items_json || []).map(i => `${i.qty}x ${i.name}`).join(', ').substring(0, 50)}
                                 </td>
                                 <td style="padding: 12px 16px; font-weight: 700; color: var(--accent);">₹${sale.total}</td>
-                                <td style="padding: 12px 16px; color: var(--text-muted);">${formatDate(sale.closedTime)}</td>
+                                <td style="padding: 12px 16px; color: var(--text-muted);">${formatDate(sale.closed_at)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
