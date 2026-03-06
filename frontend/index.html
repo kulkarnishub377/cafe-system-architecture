@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title># SK cafe - Welcome</title>
+    <title>The Bean & Brew Café - Welcome</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -23,14 +23,14 @@
             letter-spacing: -2px;
             line-height: 1.1;
             margin-bottom: 24px;
-            background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+            background: linear-gradient(135deg, #f5ede3 0%, #d4a659 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .light-mode .hero-title {
-            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            background: linear-gradient(135deg, #2c1810 0%, #6b3a1f 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -121,7 +121,7 @@
     <header class="header-glass">
         <div class="logo">
             <div class="logo-icon">☕</div>
-            <div class="logo-text"># SK cafe</div>
+            <div class="logo-text">The Bean & Brew Café</div>
         </div>
         <div class="header-actions">
             <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
@@ -138,16 +138,15 @@
                 style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; padding: 8px 16px; font-size: 13px;">
                 <span
                     style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; animation: pulse-ring 2s infinite;"></span>
-                <span>Experience Luxury</span>
+                <span>Open Now</span>
             </div>
 
             <h1 class="hero-title font-serif">
-                <span class="text-accent"># 91</span> # SK cafe
+                The Bean & <span class="text-accent">Brew</span> Café
             </h1>
 
             <p class="text-muted" style="font-size: 18px; max-width: 480px; margin: 0 auto; line-height: 1.6;">
-                Where craftsmanship meets comfort. Experience the finest coffee and culinary delights in a space
-                designed for you.
+                Where every cup tells a story. Savor artisan coffee, fresh-crafted meals, and warm hospitality in our cozy haven.
             </p>
         </section>
 
@@ -207,12 +206,98 @@
             </div>
         </section>
 
+        <!-- Today's Specials -->
+        <section style="max-width: 1000px; margin: 0 auto 60px; padding: 0 20px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <p class="text-muted" style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; margin-bottom: 8px;">Today's Specials</p>
+                <h2 class="font-serif" style="font-size: 32px;">Chef's Recommendations</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+                <div class="portal-card" style="padding: 0; overflow: hidden;">
+                    <div style="height: 160px; background: linear-gradient(135deg, var(--accent-light), rgba(200,98,74,0.1)); display: flex; align-items: center; justify-content: center; font-size: 64px;">☕</div>
+                    <div style="padding: 20px;">
+                        <div class="badge badge-warning" style="margin-bottom: 8px; font-size: 11px;">Bestseller</div>
+                        <h3 class="font-serif" style="font-size: 18px; margin-bottom: 6px;">Single Origin Espresso</h3>
+                        <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">Rich, bold Ethiopian Yirgacheffe with notes of dark chocolate and berry.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="text-accent" style="font-weight: 700; font-size: 18px;">₹199</span>
+                            <a href="customer.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px;">Order Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-card" style="padding: 0; overflow: hidden;">
+                    <div style="height: 160px; background: linear-gradient(135deg, rgba(200,98,74,0.1), var(--accent-light)); display: flex; align-items: center; justify-content: center; font-size: 64px;">🍔</div>
+                    <div style="padding: 20px;">
+                        <div class="badge badge-danger" style="margin-bottom: 8px; font-size: 11px;">Chef's Pick</div>
+                        <h3 class="font-serif" style="font-size: 18px; margin-bottom: 6px;">Truffle Mushroom Burger</h3>
+                        <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">Double-stacked patty with truffle aioli, caramelized onions & aged cheddar.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="text-accent" style="font-weight: 700; font-size: 18px;">₹449</span>
+                            <a href="customer.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px;">Order Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-card" style="padding: 0; overflow: hidden;">
+                    <div style="height: 160px; background: linear-gradient(135deg, rgba(109,179,112,0.1), var(--accent-light)); display: flex; align-items: center; justify-content: center; font-size: 64px;">🍰</div>
+                    <div style="padding: 20px;">
+                        <div class="badge badge-success" style="margin-bottom: 8px; font-size: 11px;">New</div>
+                        <h3 class="font-serif" style="font-size: 18px; margin-bottom: 6px;">Salted Caramel Cheesecake</h3>
+                        <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">Velvety NY-style cheesecake drizzled with housemade salted caramel sauce.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="text-accent" style="font-weight: 700; font-size: 18px;">₹299</span>
+                            <a href="customer.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px;">Order Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us -->
+        <section style="max-width: 1000px; margin: 0 auto 80px; padding: 0 20px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <p class="text-muted" style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; margin-bottom: 8px;">Why Us</p>
+                <h2 class="font-serif" style="font-size: 32px;">The Bean & Brew Difference</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div class="card" style="text-align: center; padding: 32px 20px;">
+                    <div style="font-size: 40px; margin-bottom: 16px;">🌿</div>
+                    <h3 class="font-serif" style="font-size: 18px; margin-bottom: 8px;">Fresh Ingredients</h3>
+                    <p class="text-muted" style="font-size: 13px;">Farm-to-table produce sourced daily from local organic farms.</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 32px 20px;">
+                    <div style="font-size: 40px; margin-bottom: 16px;">⚡</div>
+                    <h3 class="font-serif" style="font-size: 18px; margin-bottom: 8px;">Fast Service</h3>
+                    <p class="text-muted" style="font-size: 13px;">Order from your table. Most items ready in under 15 minutes.</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 32px 20px;">
+                    <div style="font-size: 40px; margin-bottom: 16px;">☕</div>
+                    <h3 class="font-serif" style="font-size: 18px; margin-bottom: 8px;">Premium Coffee</h3>
+                    <p class="text-muted" style="font-size: 13px;">Single-origin beans roasted in-house for the perfect brew.</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 32px 20px;">
+                    <div style="font-size: 40px; margin-bottom: 16px;">🛋️</div>
+                    <h3 class="font-serif" style="font-size: 18px; margin-bottom: 8px;">Cozy Ambiance</h3>
+                    <p class="text-muted" style="font-size: 13px;">Thoughtfully designed spaces to relax, work, or connect.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer
-        style="text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px;">
-        <p style="margin-bottom: 8px;">&copy; 2026 # SK cafe. All rights reserved.</p>
-        <p>Crafted with <span class="text-accent">♥</span> for excellence.</p>
+    <footer style="border-top: 1px solid var(--border); padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
+        <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">☕</span>
+                    <span class="font-serif" style="font-size: 18px; color: var(--text-dark);">The Bean & Brew Café</span>
+                </div>
+                <p>Crafted with <span class="text-accent">♥</span> for coffee lovers.</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin-bottom: 4px;">&copy; 2026 The Bean & Brew Café. All rights reserved.</p>
+                <p>123 Coffee Street, Bengaluru · +91 98765 43210</p>
+            </div>
+        </div>
     </footer>
 
     <script src="data.js"></script>
