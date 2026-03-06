@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title># 91 VRS Cafe - Welcome</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .hero {
+            text-align: center;
+            padding: 60px 20px 80px;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .light-mode .hero-title {
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+        }
+
+        .portal-card {
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            padding: 40px 32px;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .portal-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+            color: var(--accent);
+            transition: 0.3s;
+            border: 1px solid var(--border);
+        }
+
+        .portal-card:hover .portal-icon {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .quick-access-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .quick-access-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+            background: var(--bg-card-hover);
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+    <div class="bg-pattern"></div>
+    <div class="grain"></div>
+
+    <!-- Standardized Header -->
+    <header class="header-glass">
+        <div class="logo">
+            <div class="logo-icon">☕</div>
+            <div class="logo-text"># 91 VRS</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
+                <i class="ri-moon-line" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge badge-success"
+                style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; padding: 8px 16px; font-size: 13px;">
+                <span
+                    style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; animation: pulse-ring 2s infinite;"></span>
+                <span>Experience Luxury</span>
+            </div>
+
+            <h1 class="hero-title font-serif">
+                <span class="text-accent"># 91</span> VRS Cafe
+            </h1>
+
+            <p class="text-muted" style="font-size: 18px; max-width: 480px; margin: 0 auto; line-height: 1.6;">
+                Where craftsmanship meets comfort. Experience the finest coffee and culinary delights in a space
+                designed for you.
+            </p>
+        </section>
+
+        <!-- Main Portals -->
+        <section class="portal-grid">
+
+            <!-- Customer -->
+            <a href="customer.html" class="portal-card">
+                <div class="portal-icon"><i class="ri-restaurant-2-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Order Food</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Browse our curated menu, customize your meals, and order directly from your table.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    Start Ordering <i class="ri-arrow-right-line"></i>
+                </div>
+            </a>
+
+            <!-- Kitchen -->
+            <a href="kitchen.html" class="portal-card">
+                <div class="portal-icon"><i class="ri-fire-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Kitchen Display</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Real-time order management for chefs. Track preparation times and manage stock.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    Open KDS <i class="ri-arrow-right-line"></i>
+                </div>
+            </a>
+
+            <!-- Admin -->
+            <a href="admin.html" class="portal-card">
+                <div class="portal-icon"><i class="ri-dashboard-3-fill"></i></div>
+                <h2 class="font-serif" style="font-size: 24px; margin-bottom: 12px;">Manager Panel</h2>
+                <p class="text-muted" style="font-size: 15px; margin-bottom: 32px; flex: 1;">
+                    Complete control over sales, analytics, menu items, and table management.
+                </p>
+                <div class="text-accent" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    Access Dashboard <i class="ri-arrow-right-line"></i>
+                </div>
+            </a>
+
+        </section>
+
+        <!-- Quick Access -->
+        <section style="text-align: center; margin-bottom: 80px;">
+            <p class="text-muted"
+                style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; margin-bottom: 24px;">
+                Quick Table Access</p>
+            <div
+                style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 600px; margin: 0 auto;">
+                <script>
+                    for (let i = 1; i <= 12; i++) {
+                        document.write(`<a href="customer.html?table=${i}" class="quick-access-btn">${i}</a>`)
+                    }
+                </script>
+            </div>
+        </section>
+
+    </main>
+
+    <footer
+        style="text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px;">
+        <p style="margin-bottom: 8px;">&copy; 2026 # 91 VRS Cafe. All rights reserved.</p>
+        <p>Crafted with <span class="text-accent">♥</span> for excellence.</p>
+    </footer>
+
+    <script src="data.js"></script>
+    <script>
+        function init() {
+            // Immediate Theme Check
+            const savedTheme = localStorage.getItem('vrs_theme');
+            if (savedTheme === 'light') document.body.classList.add('light-mode');
+            updateThemeIcon();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('vrs_theme', isLight ? 'light' : 'dark');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isLight = document.body.classList.contains('light-mode');
+            document.getElementById('themeIcon').className = isLight ? 'ri-sun-line' : 'ri-moon-line';
+        }
+
+        // Run immediately
+        init();
+    </script>
+</body>
+
+</html>
