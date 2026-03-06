@@ -1,70 +1,70 @@
 /* ============================================
-   # 91 VRS CAFE - VIBRANT YOUTH DESIGN SYSTEM
+   THE BEAN & BREW CAFÉ - PREMIUM COFFEE DESIGN SYSTEM
    ============================================ */
 
-/* 1. VARIABLES & THEME - Electric Neon Vibes */
+/* 1. VARIABLES & THEME - Deep Espresso Vibes */
 :root {
-    /* Colors - Deep Purple/Cyan Gradient Theme */
-    --bg-dark: #0a0a1a;
-    /* Deep space blue-black */
-    --bg-light: #f8fafc;
+    /* Colors - Deep Espresso Theme */
+    --bg-dark: #1a0e06;
+    /* Deep espresso brown */
+    --bg-light: #faf6f1;
 
-    /* Glassmorphism with purple tint */
-    --bg-card: rgba(30, 20, 60, 0.7);
-    --bg-card-hover: rgba(50, 35, 90, 0.8);
-    --bg-glass: rgba(15, 10, 40, 0.9);
+    /* Warm card backgrounds */
+    --bg-card: rgba(45, 24, 16, 0.75);
+    --bg-card-hover: rgba(62, 35, 22, 0.85);
+    --bg-glass: rgba(26, 14, 6, 0.92);
 
-    --text-dark: #ffffff;
-    --text-light: #1e1b4b;
-    --text-muted: #a5b4fc;
+    --text-dark: #f5ede3;
+    --text-light: #2c1810;
+    --text-muted: #c4956a;
 
-    /* Electric Cyan/Purple Accent */
-    --accent: #06b6d4;
-    --accent-hover: #22d3ee;
-    --accent-glow: rgba(6, 182, 212, 0.5);
-    --accent-light: rgba(6, 182, 212, 0.15);
+    /* Warm Amber/Gold Accent */
+    --accent: #d4a659;
+    --accent-hover: #e8b96a;
+    --accent-glow: rgba(212, 166, 89, 0.5);
+    --accent-light: rgba(212, 166, 89, 0.15);
 
-    /* Secondary accent - Vibrant Pink */
-    --accent-secondary: #ec4899;
-    --accent-secondary-glow: rgba(236, 72, 153, 0.4);
+    /* Secondary accent - Terracotta */
+    --accent-secondary: #c8624a;
+    --accent-secondary-glow: rgba(200, 98, 74, 0.4);
 
-    --success: #10b981;
-    --success-glow: rgba(16, 185, 129, 0.4);
+    --success: #6db370;
+    --success-glow: rgba(109, 179, 112, 0.4);
 
-    --danger: #f43f5e;
-    --warning: #f59e0b;
+    --danger: #d4614a;
+    --warning: #e8a53a;
 
-    --border: rgba(139, 92, 246, 0.25);
-    --border-light: rgba(139, 92, 246, 0.4);
+    --border: rgba(212, 166, 89, 0.2);
+    --border-light: rgba(212, 166, 89, 0.35);
 
     /* Spacing */
     --header-height: 72px;
     --bottom-nav-height: 80px;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #ec4899 100%);
-    --gradient-card: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.05));
+    --gradient-primary: linear-gradient(135deg, #d4a659 0%, #c8624a 50%, #a0522d 100%);
+    --gradient-card: linear-gradient(145deg, rgba(212, 166, 89, 0.08), rgba(200, 98, 74, 0.04));
 }
 
-/* Light Mode - Fresh & Clean */
+/* Light Mode - Warm & Clean */
 [data-theme="light"],
 body.light-mode {
-    --bg-dark: #f8fafc;
-    --text-dark: #1e1b4b;
-    --bg-card: rgba(255, 255, 255, 0.95);
-    --bg-card-hover: rgba(248, 250, 252, 1);
-    --bg-glass: rgba(255, 255, 255, 0.98);
-    --border: rgba(99, 102, 241, 0.25);
-    --border-light: rgba(99, 102, 241, 0.4);
-    --text-muted: #6366f1;
-    --accent: #7c3aed;
-    --accent-hover: #8b5cf6;
-    --accent-glow: rgba(124, 58, 237, 0.5);
-    --accent-light: rgba(124, 58, 237, 0.15);
-    --accent-secondary: #db2777;
-    --accent-secondary-glow: rgba(219, 39, 119, 0.4);
-    --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%);
-    --gradient-card: linear-gradient(145deg, rgba(124, 58, 237, 0.08), rgba(219, 39, 119, 0.04));
+    --bg-dark: #faf6f1;
+    --text-dark: #2c1810;
+    --bg-card: rgba(255, 248, 240, 0.97);
+    --bg-card-hover: rgba(255, 252, 247, 1);
+    --bg-glass: rgba(255, 250, 244, 0.99);
+    --border: rgba(160, 100, 50, 0.2);
+    --border-light: rgba(160, 100, 50, 0.35);
+    --text-muted: #8b5a2b;
+    --accent: #a0522d;
+    --accent-hover: #b5621f;
+    --accent-glow: rgba(160, 82, 45, 0.4);
+    --accent-light: rgba(160, 82, 45, 0.12);
+    --accent-secondary: #c8624a;
+    --accent-secondary-glow: rgba(200, 98, 74, 0.35);
+    --gradient-primary: linear-gradient(135deg, #a0522d 0%, #c8624a 50%, #d4a659 100%);
+    --gradient-card: linear-gradient(145deg, rgba(160, 82, 45, 0.07), rgba(200, 98, 74, 0.03));
 }
 
 /* 2. RESET & BASE */
@@ -104,15 +104,15 @@ h6,
     font-family: 'Playfair Display', serif;
 }
 
-/* 3. BACKGROUND EFFECTS - Vibrant Animated Orbs */
+/* 3. BACKGROUND EFFECTS - Warm Animated Orbs */
 .bg-pattern {
     position: fixed;
     inset: 0;
     background-image:
-        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 70% 70%, rgba(99, 102, 241, 0.08) 0%, transparent 35%);
+        radial-gradient(circle at 20% 30%, rgba(212, 166, 89, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(200, 98, 74, 0.09) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(160, 82, 45, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(212, 166, 89, 0.06) 0%, transparent 35%);
     pointer-events: none;
     z-index: -2;
     animation: bgFloat 20s ease-in-out infinite alternate;
@@ -131,10 +131,10 @@ h6,
 [data-theme="light"] .bg-pattern,
 body.light-mode .bg-pattern {
     background-image:
-        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 70% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 35%);
+        radial-gradient(circle at 20% 30%, rgba(212, 166, 89, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(200, 98, 74, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(160, 82, 45, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(212, 166, 89, 0.08) 0%, transparent 35%);
 }
 
 .grain {
@@ -193,12 +193,12 @@ body.light-mode .bg-pattern {
 .btn-primary {
     background: var(--gradient-primary);
     color: #fff;
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    box-shadow: 0 4px 15px rgba(212, 166, 89, 0.35);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.5);
+    box-shadow: 0 8px 25px rgba(212, 166, 89, 0.5);
 }
 
 .btn-secondary {
@@ -798,7 +798,7 @@ body.light-mode .bg-pattern {
 .table-card:hover {
     border-color: var(--accent);
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(6, 182, 212, 0.2);
+    box-shadow: 0 12px 24px rgba(212, 166, 89, 0.2);
 }
 
 .table-card:hover::before {
