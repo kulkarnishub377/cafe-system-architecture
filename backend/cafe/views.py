@@ -51,7 +51,7 @@ from .serializers import (
     TableSerializer,
     TableSessionSerializer,
 )
-from .utils import calculate_bill
+from .utils import calculate_bill, get_client_ip
 from .permissions import IsAdminStaff, IsKitchenOrAdmin, IsStaffMember
 
 
@@ -219,7 +219,7 @@ class TableSessionViewSet(ViewSet):
         session_type = request.data.get('session_type', TableSession.SESSION_TYPE_DINE_IN)
         discount_code = request.data.get('discount_code', '')
 
-        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
+        ip = get_client_ip(request)
         with transaction.atomic():
             session, created = TableSession.objects.get_or_create(
                 table_num=pk,
@@ -326,7 +326,7 @@ class TableSessionViewSet(ViewSet):
             items_snapshot, settings.tax_rate, session.discount_amount
         )
 
-        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
+        ip = get_client_ip(request)
         SalesRecord.objects.create(
             table_num=session.table_num,
             customer_name=session.customer_name,
@@ -865,23 +865,17 @@ class CustomerViewSet(ViewSet):
 
     def _get_client_ip(self, request) -> str:
         """Extract the real client IP from request headers."""
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0].strip()
-        return request.META.get('REMOTE_ADDR', '127.0.0.1')
+        return get_client_ip(request) or '127.0.0.1'
 
     @extend_schema(summary='Customer visit profile (IP-based, no login)', tags=['customer'])
     @action(detail=False, methods=['get'], url_path='me')
     def me(self, request):
         """Return visit profile for the current customer IP."""
-        from django.db.models import F
         ip = self._get_client_ip(request)
         visit, created = CustomerVisit.objects.get_or_create(ip_address=ip)
         if not created:
-            CustomerVisit.objects.filter(ip_address=ip).update(
-                visit_count=F('visit_count') + 1,
-            )
-            visit.refresh_from_db()
+            visit.visit_count += 1
+            visit.save(update_fields=['visit_count', 'last_seen'])
         return Response({
             'ip_address': ip,
             'preferred_name': visit.preferred_name,
