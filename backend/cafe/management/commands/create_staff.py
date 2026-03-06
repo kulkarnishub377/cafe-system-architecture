@@ -1,17 +1,30 @@
 """Management command to create default staff accounts."""
+import os
+import secrets
+import string
+
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from cafe.models import StaffProfile
+
+
+def _generate_password(length=16):
+    """Return a cryptographically secure random password."""
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
 class Command(BaseCommand):
     help = 'Create default staff accounts for the cafe system'
 
     def handle(self, *args, **kwargs):
+        admin_pw = os.environ.get('ADMIN_PASSWORD') or _generate_password()
+        kitchen_pw = os.environ.get('KITCHEN1_PASSWORD') or _generate_password()
+        waiter_pw = os.environ.get('WAITER1_PASSWORD') or _generate_password()
         accounts = [
             {
                 'username': 'admin',
-                'password': 'Admin@SKCafe',
+                'password': admin_pw,
                 'first_name': 'Admin',
                 'last_name': 'Manager',
                 'email': 'admin@skcafe.in',
@@ -21,7 +34,7 @@ class Command(BaseCommand):
             },
             {
                 'username': 'kitchen1',
-                'password': 'Kitchen@SKCafe',
+                'password': kitchen_pw,
                 'first_name': 'Chef',
                 'last_name': 'Kumar',
                 'email': 'kitchen@skcafe.in',
@@ -29,7 +42,7 @@ class Command(BaseCommand):
             },
             {
                 'username': 'waiter1',
-                'password': 'Waiter@SKCafe',
+                'password': waiter_pw,
                 'first_name': 'Waiter',
                 'last_name': 'Singh',
                 'email': 'waiter@skcafe.in',
@@ -53,7 +66,11 @@ class Command(BaseCommand):
                 StaffProfile.objects.get_or_create(user=user, defaults={'role': role})
                 created += 1
                 self.stdout.write(
-                    self.style.SUCCESS(f"  ✅  Created '{user.username}' ({role})")
+                    self.style.WARNING(
+                        f"  ✅  Created '{user.username}' ({role})  "
+                        f"password: {password}  "
+                        f"⚠️  Save this password now — it will not be shown again."
+                    )
                 )
             else:
                 self.stdout.write(f"  ⚠️  '{user.username}' already exists, skipped.")

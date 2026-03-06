@@ -214,7 +214,7 @@ Customers **never need to log in**. They are identified by their **IP address**,
 ```bash
 # Login
 POST /api/auth/login/
-{ "username": "admin", "password": "Admin@SKCafe" }
+{ "username": "admin", "password": "<your-admin-password>" }
 → { "token": "abc123...", "role": "admin", "is_on_duty": true }
 
 # All subsequent staff requests:
@@ -223,13 +223,18 @@ Authorization: Token abc123...
 
 Default accounts created by `python manage.py create_staff`:
 
-| Username | Password | Role |
+| Username | Env Variable | Role |
 |---|---|---|
-| `admin` | `Admin@SKCafe` | Admin / Manager |
-| `kitchen1` | `Kitchen@SKCafe` | Kitchen Staff |
-| `waiter1` | `Waiter@SKCafe` | Waiter |
+| `admin` | `ADMIN_PASSWORD` | Admin / Manager |
+| `kitchen1` | `KITCHEN1_PASSWORD` | Kitchen Staff |
+| `waiter1` | `WAITER1_PASSWORD` | Waiter |
 
-> ⚠️ Change passwords before deploying to production.
+Set the environment variables before running the command, or passwords will be
+auto-generated and printed to stdout on first run.
+
+> ⚠️ Always set strong passwords via environment variables before deploying to production.
+> Auto-generated passwords are printed once to stdout on first run — treat that output as a secret
+> and change passwords immediately using `python manage.py changepassword <username>`.
 
 ---
 
