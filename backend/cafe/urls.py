@@ -34,7 +34,7 @@ router.register(r'reservations', ReservationViewSet, basename='reservation')
 router.register(r'discounts', DiscountViewSet, basename='discount')
 router.register(r'feedback', OrderFeedbackViewSet, basename='feedback')
 router.register(r'auth', AuthViewSet, basename='auth')
-router.register(r'customers', CustomerViewSet, basename='customer')
+router.register(r'customer', CustomerViewSet, basename='customer')
 
 # Sessions are keyed by table number, not a standard pk
 sessions_urls = [

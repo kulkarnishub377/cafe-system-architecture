@@ -283,24 +283,14 @@ class CafeSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(StaffProfile)
 class StaffProfileAdmin(admin.ModelAdmin):
-    """Admin for staff user profiles."""
+    list_display = ['user', 'role', 'is_on_duty', 'phone']
+    list_editable = ['is_on_duty']
+    list_filter = ['role', 'is_on_duty']
+    search_fields = ['user__username', 'user__first_name', 'user__last_name']
 
-    list_display = ('user', 'role')
-    list_filter = ('role',)
-    search_fields = ('user__username',)
-    raw_id_fields = ('user',)
-
-
-# ---------------------------------------------------------------------------
-# Customer Visits
-# ---------------------------------------------------------------------------
 
 @admin.register(CustomerVisit)
 class CustomerVisitAdmin(admin.ModelAdmin):
-    """Admin for anonymous customer visit records."""
-
-    list_display = ('ip_address', 'table_num', 'sales_record', 'created_at')
-    list_filter = ('table_num',)
-    search_fields = ('ip_address',)
-    readonly_fields = ('created_at', 'updated_at')
-    date_hierarchy = 'created_at'
+    list_display = ['ip_address', 'preferred_name', 'visit_count', 'last_seen']
+    readonly_fields = ['ip_address', 'first_visit', 'last_seen', 'visit_count']
+    search_fields = ['ip_address', 'preferred_name']

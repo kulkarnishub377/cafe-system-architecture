@@ -459,49 +459,52 @@ class CafeSettings(models.Model):
 # ---------------------------------------------------------------------------
 
 class StaffProfile(models.Model):
-    """Links a Django User to a cafe staff role."""
+    """Extended profile for cafe staff members linked to Django's User model."""
 
     ROLE_ADMIN = 'admin'
     ROLE_KITCHEN = 'kitchen'
-    ROLE_CASHIER = 'cashier'
-
+    ROLE_WAITER = 'waiter'
     ROLE_CHOICES = [
-        (ROLE_ADMIN, 'Admin'),
-        (ROLE_KITCHEN, 'Kitchen'),
-        (ROLE_CASHIER, 'Cashier'),
+        (ROLE_ADMIN, 'Admin / Manager'),
+        (ROLE_KITCHEN, 'Kitchen Staff'),
+        (ROLE_WAITER, 'Waiter / Front-of-house'),
     ]
 
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='staff_profile',
-    )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_KITCHEN)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_WAITER)
+    phone = models.CharField(max_length=20, blank=True)
+    profile_picture_url = models.URLField(max_length=500, blank=True)
+    is_on_duty = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Staff Profile'
 
     def __str__(self) -> str:
-        return f'{self.user.username} ({self.role})'
+        return f'{self.user.get_full_name() or self.user.username} ({self.role})'
 
 
 # ---------------------------------------------------------------------------
 # Customer Visits
 # ---------------------------------------------------------------------------
 
-class CustomerVisit(BaseModel):
-    """Records an anonymous customer visit keyed by IP address."""
-
-    ip_address = models.GenericIPAddressField(db_index=True)
-    table_num = models.PositiveSmallIntegerField()
-    sales_record = models.ForeignKey(
-        SalesRecord,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='customer_visits',
-    )
+class CustomerVisit(models.Model):
+    """
+    Tracks anonymous customer visits by IP address.
+    Customers do not have accounts – we identify them by IP only.
+    """
+    ip_address = models.GenericIPAddressField(unique=True)
+    preferred_name = models.CharField(max_length=200, blank=True, help_text='Name set by customer on last order')
+    visit_count = models.PositiveIntegerField(default=1)
+    first_visit = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
+    device_info = models.CharField(max_length=500, blank=True, help_text='User-Agent string of last visit')
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-last_seen']
+        indexes = [models.Index(fields=['ip_address'])]
+        verbose_name = 'Customer Visit'
 
     def __str__(self) -> str:
-        return f'Visit from {self.ip_address} at Table {self.table_num}'
+        return f'Customer @ {self.ip_address} (visits: {self.visit_count})'

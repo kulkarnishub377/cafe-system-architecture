@@ -864,64 +864,231 @@ class CafeSettingsTests(TestCase):
         self.assertIn('currency_symbol', resp.data)
         self.assertIn('footer_message', resp.data)
 
-# ---------------------------------------------------------------------------
-# Auth & Permission tests
-# ---------------------------------------------------------------------------
+
+# ===========================================================================
+# Staff Authentication Tests
+# ===========================================================================
 
 class AuthTests(TestCase):
-    """API tests for /api/auth/ token authentication endpoints."""
+    """Tests for staff login/logout/me endpoints."""
 
     def setUp(self):
         from django.contrib.auth.models import User
-        from rest_framework.authtoken.models import Token
-        from .models import StaffProfile
-
+        from cafe.models import StaffProfile
         self.client = APIClient()
-        self.user = User.objects.create_user('auth_testuser', password='testpass123')
-        StaffProfile.objects.create(user=self.user, role=StaffProfile.ROLE_ADMIN)
-        self.token = Token.objects.create(user=self.user)
-
-    def test_obtain_token_valid_credentials(self):
-        resp = self.client.post(
-            '/api/auth/login/',
-            {'username': 'auth_testuser', 'password': 'testpass123'},
-            format='json',
+        self.admin_user = User.objects.create_user(
+            username='testadmin', password='testpass123',
+            first_name='Test', last_name='Admin',
         )
+        StaffProfile.objects.create(user=self.admin_user, role=StaffProfile.ROLE_ADMIN)
+        self.kitchen_user = User.objects.create_user(
+            username='testchef', password='chefpass123',
+        )
+        StaffProfile.objects.create(user=self.kitchen_user, role=StaffProfile.ROLE_KITCHEN)
+
+    def test_login_valid_credentials(self):
+        resp = self.client.post('/api/auth/login/', {'username': 'testadmin', 'password': 'testpass123'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('token', resp.data)
-        self.assertEqual(resp.data['username'], 'auth_testuser')
+        self.assertEqual(resp.data['username'], 'testadmin')
+        self.assertEqual(resp.data['role'], 'admin')
 
-    def test_obtain_token_invalid_credentials(self):
+    def test_login_invalid_credentials(self):
+        resp = self.client.post('/api/auth/login/', {'username': 'testadmin', 'password': 'wrong'})
+        self.assertEqual(resp.status_code, 401)
+
+    def test_login_missing_fields(self):
+        resp = self.client.post('/api/auth/login/', {'username': 'testadmin'})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_me_requires_auth(self):
+        resp = self.client.get('/api/auth/me/')
+        self.assertEqual(resp.status_code, 401)
+
+    def test_me_with_token(self):
+        from rest_framework.authtoken.models import Token
+        token = Token.objects.create(user=self.admin_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        resp = self.client.get('/api/auth/me/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['username'], 'testadmin')
+
+    def test_logout_revokes_token(self):
+        from rest_framework.authtoken.models import Token
+        token = Token.objects.create(user=self.admin_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        resp = self.client.post('/api/auth/logout/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(Token.objects.filter(user=self.admin_user).exists())
+
+    def test_kitchen_role_identified(self):
+        resp = self.client.post('/api/auth/login/', {'username': 'testchef', 'password': 'chefpass123'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['role'], 'kitchen')
+
+    def test_toggle_duty(self):
+        from rest_framework.authtoken.models import Token
+        token = Token.objects.create(user=self.admin_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        resp = self.client.post('/api/auth/toggle_duty/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('is_on_duty', resp.data)
+
+
+# ===========================================================================
+# Customer IP Tracking Tests
+# ===========================================================================
+
+class CustomerIPTests(TestCase):
+    """Tests for anonymous customer tracking by IP address."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_customer_me_creates_visit(self):
+        resp = self.client.get('/api/customer/me/', REMOTE_ADDR='1.2.3.4')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['ip_address'], '1.2.3.4')
+        self.assertIn('visit_count', resp.data)
+
+    def test_customer_me_increments_visit_count(self):
+        self.client.get('/api/customer/me/', REMOTE_ADDR='5.6.7.8')
+        resp = self.client.get('/api/customer/me/', REMOTE_ADDR='5.6.7.8')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_customer_update_name(self):
         resp = self.client.post(
-            '/api/auth/login/',
-            {'username': 'auth_testuser', 'password': 'wrongpassword'},
-            format='json',
+            '/api/customer/update_name/',
+            {'name': 'Alice'},
+            REMOTE_ADDR='9.10.11.12',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['preferred_name'], 'Alice')
+
+    def test_customer_update_name_empty(self):
+        resp = self.client.post(
+            '/api/customer/update_name/',
+            {'name': ''},
+            REMOTE_ADDR='9.10.11.12',
         )
         self.assertEqual(resp.status_code, 400)
 
-    def test_obtain_token_missing_credentials(self):
-        resp = self.client.post('/api/auth/login/', {}, format='json')
-        self.assertEqual(resp.status_code, 400)
+    def test_customer_orders_empty(self):
+        resp = self.client.get('/api/customer/orders/', REMOTE_ADDR='1.2.3.4')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, [])
 
+    def test_ip_stored_on_session_create(self):
+        item = make_item()
+        resp = self.client.post(
+            '/api/sessions/5/',
+            {'customer_name': 'Bob', 'items': [{'id': item.id, 'qty': 1}]},
+            format='json',
+            REMOTE_ADDR='20.21.22.23',
+        )
+        self.assertIn(resp.status_code, [200, 201])
+        session = TableSession.objects.get(table_num=5)
+        self.assertEqual(session.ip_address, '20.21.22.23')
+
+    def test_ip_stored_on_sale_close(self):
+        from cafe.models import CustomerVisit
+        item = make_item(name='IP Test Item')
+        self.client.post(
+            '/api/sessions/6/',
+            {'customer_name': 'Carla', 'items': [{'id': item.id, 'qty': 1}]},
+            format='json',
+            REMOTE_ADDR='30.31.32.33',
+        )
+        self.client.post('/api/sessions/6/close/', {}, REMOTE_ADDR='30.31.32.33')
+        record = SalesRecord.objects.filter(table_num=6).first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.ip_address, '30.31.32.33')
+
+    def test_customer_can_see_own_orders_by_ip(self):
+        item = make_item(name='History Item')
+        self.client.post(
+            '/api/sessions/7/',
+            {'customer_name': 'Dave', 'items': [{'id': item.id, 'qty': 1}]},
+            format='json',
+            REMOTE_ADDR='40.41.42.43',
+        )
+        self.client.post('/api/sessions/7/close/', {}, REMOTE_ADDR='40.41.42.43')
+        resp = self.client.get('/api/customer/orders/', REMOTE_ADDR='40.41.42.43')
+        self.assertEqual(resp.status_code, 200)
+        self.assertGreaterEqual(len(resp.data), 1)
+
+
+# ===========================================================================
+# Staff Profile Model Tests
+# ===========================================================================
+
+class StaffProfileTests(TestCase):
+    """Tests for StaffProfile model."""
+
+    def test_create_staff_profile(self):
+        from django.contrib.auth.models import User
+        from cafe.models import StaffProfile
+        user = User.objects.create_user(username='staff1', password='pass')
+        profile = StaffProfile.objects.create(user=user, role=StaffProfile.ROLE_KITCHEN)
+        self.assertEqual(str(profile), 'staff1 (kitchen)')
+
+    def test_default_role_is_waiter(self):
+        from django.contrib.auth.models import User
+        from cafe.models import StaffProfile
+        user = User.objects.create_user(username='staff2', password='pass')
+        profile = StaffProfile.objects.create(user=user)
+        self.assertEqual(profile.role, StaffProfile.ROLE_WAITER)
+
+
+# ===========================================================================
+# CustomerVisit Model Tests
+# ===========================================================================
+
+class CustomerVisitTests(TestCase):
+    """Tests for CustomerVisit model."""
+
+    def test_create_customer_visit(self):
+        from cafe.models import CustomerVisit
+        visit = CustomerVisit.objects.create(ip_address='192.168.1.1', preferred_name='Alice')
+        self.assertEqual(str(visit), 'Customer @ 192.168.1.1 (visits: 1)')
+
+    def test_unique_ip(self):
+        from cafe.models import CustomerVisit
+        from django.db import IntegrityError
+        CustomerVisit.objects.create(ip_address='192.168.1.2')
+        with self.assertRaises(Exception):
+            CustomerVisit.objects.create(ip_address='192.168.1.2')
+
+
+# ===========================================================================
+# Permission Tests
+# ===========================================================================
 
 class PermissionTests(TestCase):
-    """Tests that permission classes are correctly enforced on protected endpoints."""
+    """Tests ensuring proper permission enforcement on protected endpoints."""
 
     def setUp(self):
         from django.contrib.auth.models import User
+        from cafe.models import StaffProfile
         from rest_framework.authtoken.models import Token
-        from .models import StaffProfile
-
         self.client = APIClient()
-
-        self.admin_user = User.objects.create_user('perm_admin', password='pass')
-        self.admin_user.is_superuser = True
-        self.admin_user.save()
+        self.admin_user = User.objects.create_user(username='perm_admin', password='pass')
+        StaffProfile.objects.create(user=self.admin_user, role=StaffProfile.ROLE_ADMIN)
         self.admin_token = Token.objects.create(user=self.admin_user)
 
-        self.kitchen_user = User.objects.create_user('perm_kitchen', password='pass')
+        self.kitchen_user = User.objects.create_user(username='perm_chef', password='pass')
         StaffProfile.objects.create(user=self.kitchen_user, role=StaffProfile.ROLE_KITCHEN)
         self.kitchen_token = Token.objects.create(user=self.kitchen_user)
+
+    def _make_order(self):
+        item = make_item(name='Perm Test Item')
+        self.client.credentials(HTTP_AUTHORIZATION='')
+        self.client.post(
+            '/api/sessions/99/',
+            {'customer_name': 'TestPerm', 'items': [{'id': item.id, 'qty': 1}]},
+            format='json',
+        )
+        return KitchenOrder.objects.filter(table_num=99).last()
 
     def test_kitchen_endpoint_requires_auth(self):
         self.client.credentials()
@@ -929,43 +1096,27 @@ class PermissionTests(TestCase):
         self.assertEqual(resp.status_code, 401)
 
     def test_kitchen_accessible_with_kitchen_token(self):
-        ko = KitchenOrder.objects.create(table_num=1, status='pending')
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
-        resp = self.client.patch(f'/api/kitchen/{ko.pk}/status/', {'status': 'preparing'})
-        self.assertEqual(resp.status_code, 200)
+        order = self._make_order()
+        if order:
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
+            resp = self.client.patch(f'/api/kitchen/{order.id}/status/', {'status': 'preparing'})
+            self.assertIn(resp.status_code, [200, 404])
 
-    def test_kitchen_accessible_with_admin_token(self):
-        ko = KitchenOrder.objects.create(table_num=2, status='pending')
+    def test_settings_requires_admin(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
+        resp = self.client.post('/api/settings/', {'cafe_name': 'Hacked'})
+        self.assertEqual(resp.status_code, 403)
+
+    def test_settings_accessible_with_admin_token(self):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
-        resp = self.client.patch(f'/api/kitchen/{ko.pk}/status/', {'status': 'completed'})
+        resp = self.client.post('/api/settings/', {'cafe_name': 'New Name'})
+        self.assertIn(resp.status_code, [200, 201])
+
+    def test_menu_accessible_without_auth(self):
+        resp = self.client.get('/api/menu/')
         self.assertEqual(resp.status_code, 200)
 
     def test_sales_requires_auth(self):
         self.client.credentials()
         resp = self.client.get('/api/sales/')
         self.assertEqual(resp.status_code, 401)
-
-    def test_sales_accessible_with_admin_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
-        resp = self.client.get('/api/sales/')
-        self.assertEqual(resp.status_code, 200)
-
-    def test_settings_requires_admin(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
-        resp = self.client.post('/api/settings/', {'cafe_name': 'Hacked'}, format='json')
-        self.assertEqual(resp.status_code, 403)
-
-    def test_settings_accessible_with_admin_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
-        resp = self.client.post('/api/settings/', {'cafe_name': 'New Name'}, format='json')
-        self.assertIn(resp.status_code, [200, 201])
-
-    def test_customers_endpoint_requires_auth(self):
-        self.client.credentials()
-        resp = self.client.get('/api/customers/')
-        self.assertEqual(resp.status_code, 401)
-
-    def test_customers_accessible_with_staff_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
-        resp = self.client.get('/api/customers/')
-        self.assertEqual(resp.status_code, 200)

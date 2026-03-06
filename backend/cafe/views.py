@@ -16,7 +16,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .exceptions import InvalidDiscount, MenuItemOutOfStock
 from .filters import KitchenOrderFilter, MenuItemFilter, ReservationFilter, SalesRecordFilter
@@ -219,7 +219,7 @@ class TableSessionViewSet(ViewSet):
         session_type = request.data.get('session_type', TableSession.SESSION_TYPE_DINE_IN)
         discount_code = request.data.get('discount_code', '')
 
-        ip_address = request.META.get('REMOTE_ADDR')
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
         with transaction.atomic():
             session, created = TableSession.objects.get_or_create(
                 table_num=pk,
@@ -228,7 +228,7 @@ class TableSessionViewSet(ViewSet):
                     'special_instructions': special_instructions,
                     'session_type': session_type,
                     'discount_code': discount_code,
-                    'ip_address': ip_address,
+                    'ip_address': ip,
                 },
             )
             if not created:
@@ -238,6 +238,9 @@ class TableSessionViewSet(ViewSet):
                     sep = ' | ' if session.special_instructions else ''
                     session.special_instructions += sep + special_instructions
                 session.save()
+
+            if ip:
+                CustomerVisit.objects.update_or_create(ip_address=ip, defaults={'preferred_name': customer_name or ''})
 
             # Validate and apply discount code if provided
             if discount_code and not session.discount_amount:
@@ -323,8 +326,8 @@ class TableSessionViewSet(ViewSet):
             items_snapshot, settings.tax_rate, session.discount_amount
         )
 
-        ip_address = session.ip_address
-        sale_record = SalesRecord.objects.create(
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
+        SalesRecord.objects.create(
             table_num=session.table_num,
             customer_name=session.customer_name,
             special_instructions=session.special_instructions,
@@ -334,15 +337,9 @@ class TableSessionViewSet(ViewSet):
             total=bill['total'],
             payment_method=payment_method,
             start_time=session.start_time,
-            ip_address=ip_address,
+            ip_address=ip,
         )
         session.delete()
-        if ip_address:
-            CustomerVisit.objects.create(
-                ip_address=ip_address,
-                table_num=pk,
-                sales_record=sale_record,
-            )
         return Response({'detail': f'Table {pk} session closed.', 'total': bill['total']})
 
     @extend_schema(summary='Mark bill as printed', tags=['sessions'])
@@ -769,22 +766,40 @@ class CafeSettingsViewSet(ViewSet):
 # ---------------------------------------------------------------------------
 
 class AuthViewSet(ViewSet):
-    """Token-based authentication endpoints."""
+    """
+    Staff authentication endpoints.
 
-    @extend_schema(summary='Obtain auth token', tags=['auth'])
+    POST /api/auth/login/        – obtain token
+    POST /api/auth/logout/       – revoke token
+    GET  /api/auth/me/           – current user info
+    POST /api/auth/toggle_duty/  – toggle on-duty flag
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary='Staff login (obtain auth token)', tags=['auth'])
     @action(detail=False, methods=['post'], url_path='login')
     def login(self, request):
-        """Authenticate with username/password and return a token."""
+        """Authenticate staff and return an auth token."""
         from django.contrib.auth import authenticate
         from rest_framework.authtoken.models import Token
 
-        username = request.data.get('username', '')
+        username = request.data.get('username', '').strip()
         password = request.data.get('password', '')
+        if not username or not password:
+            return Response(
+                {'detail': 'Username and password are required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user = authenticate(request, username=username, password=password)
         if user is None:
             return Response(
                 {'detail': 'Invalid credentials.'},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        if not user.is_active:
+            return Response(
+                {'detail': 'Account is disabled.'},
+                status=status.HTTP_403_FORBIDDEN,
             )
         token, _ = Token.objects.get_or_create(user=user)
         profile = getattr(user, 'staff_profile', None)
@@ -792,37 +807,106 @@ class AuthViewSet(ViewSet):
             'token': token.key,
             'user_id': user.pk,
             'username': user.username,
-            'role': profile.role if profile else ('superuser' if user.is_superuser else 'staff'),
+            'full_name': user.get_full_name(),
+            'email': user.email,
+            'role': profile.role if profile else 'admin',
+            'is_on_duty': profile.is_on_duty if profile else True,
         })
 
-    @extend_schema(summary='Invalidate auth token', tags=['auth'])
-    @action(detail=False, methods=['post'], url_path='logout', permission_classes=[IsStaffMember])
+    @extend_schema(summary='Staff logout (revoke token)', tags=['auth'])
+    @action(detail=False, methods=['post'], url_path='logout', permission_classes=[IsAuthenticated])
     def logout(self, request):
-        """Delete the current user's auth token (logout)."""
-        try:
-            request.user.auth_token.delete()
-        except (AttributeError, ValueError):
-            pass
-        return Response({'detail': 'Logged out.'})
+        """Revoke the current auth token."""
+        request.user.auth_token.delete()
+        return Response({'detail': 'Logged out successfully.'})
+
+    @extend_schema(summary='Get current staff user info', tags=['auth'])
+    @action(detail=False, methods=['get'], url_path='me', permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Return the currently authenticated staff user's profile."""
+        user = request.user
+        profile = getattr(user, 'staff_profile', None)
+        return Response({
+            'user_id': user.pk,
+            'username': user.username,
+            'full_name': user.get_full_name(),
+            'email': user.email,
+            'role': profile.role if profile else 'admin',
+            'is_on_duty': profile.is_on_duty if profile else True,
+            'is_superuser': user.is_superuser,
+        })
+
+    @extend_schema(summary='Toggle on-duty status', tags=['auth'])
+    @action(detail=False, methods=['post'], url_path='toggle_duty', permission_classes=[IsAuthenticated])
+    def toggle_duty(self, request):
+        """Toggle the on-duty flag for the current staff member."""
+        profile = getattr(request.user, 'staff_profile', None)
+        if profile is None:
+            return Response({'detail': 'No staff profile found.'}, status=status.HTTP_404_NOT_FOUND)
+        profile.is_on_duty = not profile.is_on_duty
+        profile.save(update_fields=['is_on_duty', 'updated_at'])
+        return Response({'is_on_duty': profile.is_on_duty})
 
 
 # ---------------------------------------------------------------------------
-# Customer Visits
+# Customer (anonymous IP-based)
 # ---------------------------------------------------------------------------
 
 class CustomerViewSet(ViewSet):
-    """Aggregate anonymous customer visit data by IP address."""
+    """
+    Anonymous customer endpoints – no login required.
+    Customers are identified by their IP address only.
 
-    permission_classes = [IsStaffMember]
+    GET  /api/customer/me/          – customer visit profile
+    GET  /api/customer/orders/      – customer's past orders
+    POST /api/customer/update_name/ – update preferred name
+    """
+    permission_classes = [AllowAny]
 
-    @extend_schema(summary='List customer visit summaries', tags=['customers'])
-    def list(self, request):
-        """Return customer visit counts grouped by IP address."""
-        from django.db.models import Count, Max
-        visits = (
-            CustomerVisit.objects
-            .values('ip_address')
-            .annotate(visits=Count('id'), last_seen=Max('created_at'))
-            .order_by('-visits')
-        )
-        return Response(list(visits))
+    def _get_client_ip(self, request) -> str:
+        """Extract the real client IP from request headers."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+    @extend_schema(summary='Customer visit profile (IP-based, no login)', tags=['customer'])
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        """Return visit profile for the current customer IP."""
+        from django.db.models import F
+        ip = self._get_client_ip(request)
+        visit, created = CustomerVisit.objects.get_or_create(ip_address=ip)
+        if not created:
+            CustomerVisit.objects.filter(ip_address=ip).update(
+                visit_count=F('visit_count') + 1,
+            )
+            visit.refresh_from_db()
+        return Response({
+            'ip_address': ip,
+            'preferred_name': visit.preferred_name,
+            'visit_count': visit.visit_count,
+            'first_visit': visit.first_visit,
+            'last_seen': visit.last_seen,
+        })
+
+    @extend_schema(summary='Customer order history (IP-based)', tags=['customer'])
+    @action(detail=False, methods=['get'], url_path='orders')
+    def orders(self, request):
+        """Return past orders for the current customer IP."""
+        ip = self._get_client_ip(request)
+        records = SalesRecord.objects.filter(ip_address=ip).order_by('-closed_at')[:20]
+        return Response(SalesRecordSerializer(records, many=True).data)
+
+    @extend_schema(summary='Update customer preferred name', tags=['customer'])
+    @action(detail=False, methods=['post'], url_path='update_name')
+    def update_name(self, request):
+        """Update the preferred name for this customer IP."""
+        ip = self._get_client_ip(request)
+        name = request.data.get('name', '').strip()
+        if not name:
+            return Response({'detail': 'Name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        visit, _ = CustomerVisit.objects.get_or_create(ip_address=ip)
+        visit.preferred_name = name
+        visit.save(update_fields=['preferred_name', 'last_seen'])
+        return Response({'preferred_name': name, 'ip_address': ip})

@@ -24,7 +24,7 @@ class Command(BaseCommand):
             '--role',
             type=str,
             default=StaffProfile.ROLE_KITCHEN,
-            choices=[StaffProfile.ROLE_ADMIN, StaffProfile.ROLE_KITCHEN, StaffProfile.ROLE_CASHIER],
+            choices=[StaffProfile.ROLE_ADMIN, StaffProfile.ROLE_KITCHEN, StaffProfile.ROLE_WAITER],
             help='Staff role (default: kitchen)',
         )
         parser.add_argument(
