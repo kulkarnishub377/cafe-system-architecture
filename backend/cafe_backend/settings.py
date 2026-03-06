@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'corsheaders',
+    'django_filters',
+    'drf_spectacular',
     # Local
     'cafe',
 ]
@@ -138,7 +140,30 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
-    'DEFAULT_PAGINATION_CLASS': None,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# -------------------------------------------------------------------
+# drf-spectacular OpenAPI schema settings
+# -------------------------------------------------------------------
+SPECTACULAR_SETTINGS = {
+    'TITLE': '# 91 VRS Cafe API',
+    'VERSION': '2.0.0',
+    'DESCRIPTION': (
+        'REST API for # 91 VRS Cafe — menu management, table sessions, '
+        'kitchen orders, reservations, discounts, feedback and analytics.'
+    ),
+    'CONTACT': {'name': '# 91 VRS Cafe', 'email': 'admin@91vrscafe.in'},
+    'LICENSE': {'name': 'Proprietary'},
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
 }
 
 # -------------------------------------------------------------------

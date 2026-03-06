@@ -162,3 +162,7 @@ class Command(BaseCommand):
         settings, created = CafeSettings.objects.get_or_create(pk=1)
         action = 'Created' if created else 'Verified'
         self.stdout.write(self.style.SUCCESS(f'✅  {action} default CafeSettings.'))
+
+        # Also seed tables
+        from django.core.management import call_command
+        call_command('seed_tables', stdout=self.stdout, stderr=self.stderr)
