@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen Display - # SK cafe</title>
+    <title>Kitchen Display - The Bean & Brew Café</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -108,12 +108,15 @@
         <div class="logo">
             <a href="index.html" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
                 <div class="logo-icon">🔥</div>
-                <div class="logo-text">KDS <span
-                        style="font-size: 14px; opacity: 0.6; font-family: 'Inter', sans-serif;">System</span></div>
+                <div class="logo-text">The Bean & Brew <span
+                        style="font-size: 14px; opacity: 0.6; font-family: 'Inter', sans-serif;">Kitchen</span></div>
             </a>
         </div>
 
         <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+            <button class="btn btn-success" onclick="completeAll()" id="completeAllBtn" style="padding: 10px 16px; font-size: 13px; background: #22c55e; color: #fff; border: none; display: none;">
+                <i class="ri-check-double-line"></i> <span class="hidden-mobile">Complete All</span>
+            </button>
             <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">
                 <i class="ri-moon-line" id="themeIcon"></i>
             </button>
@@ -151,6 +154,14 @@
                 <div class="stat-value" id="statAvgTime">0m</div>
                 <div class="stat-label">Avg Time</div>
             </div>
+        </div>
+
+        <!-- Rush Hour Indicator -->
+        <div id="rushHourBanner" style="display: none; background: linear-gradient(135deg, var(--danger), #ff6b35); border-radius: 16px; padding: 16px 24px; margin-bottom: 24px; text-align: center; animation: pulse-ring 1.5s infinite;">
+            <span style="font-size: 24px;">🚨</span>
+            <span style="font-weight: 700; font-size: 18px; margin: 0 12px; color: #fff;">RUSH HOUR</span>
+            <span style="font-size: 24px;">🚨</span>
+            <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin-top: 4px;">5+ pending orders — All hands on deck!</p>
         </div>
 
         <!-- Orders Grid -->
@@ -241,6 +252,14 @@
                 document.getElementById('statCooking').textContent = cooking;
                 document.getElementById('statDone').textContent = done;
                 document.getElementById('statAvgTime').textContent = avgTime + 'm';
+
+                // Rush hour indicator
+                const rushBanner = document.getElementById('rushHourBanner');
+                if (rushBanner) rushBanner.style.display = pending >= 5 ? 'block' : 'none';
+
+                // Complete All button visibility
+                const completeAllBtn = document.getElementById('completeAllBtn');
+                if (completeAllBtn) completeAllBtn.style.display = (pending + cooking) > 0 ? 'inline-flex' : 'none';
             } catch (e) { /* ignore polling errors */ }
         }
 
@@ -273,12 +292,23 @@
                     if (order.status === 'preparing') statusClass = 'cooking';
                     if (elapsed > 15) statusClass = 'late';
 
+                    const priorityColor = elapsed > 15 ? 'var(--danger)' : (order.status === 'preparing' ? 'var(--warning)' : 'var(--success)');
+                    const priorityLabel = elapsed > 15 ? '🔴 Late' : (order.status === 'preparing' ? '🟡 In Progress' : '🟢 New');
+                    const prepTime = Math.max(1, order.estimated_minutes || 15);
+                    const remaining = Math.max(0, prepTime - elapsed);
+
                     return `
-                        <div class="card order-card ${statusClass}">
+                        <div class="card order-card ${statusClass}" id="order-card-${order.id}">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                                <div style="flex:1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.min(100, (elapsed/prepTime)*100)}%; background: ${priorityColor}; border-radius: 2px; transition: width 1s;"></div>
+                                </div>
+                                <span style="font-size: 11px; font-weight: 600; color: ${priorityColor}; white-space: nowrap;">${priorityLabel}</span>
+                            </div>
                             <div class="order-header">
                                 <div>
                                     <h3 class="font-serif" style="font-size: 18px;">Table ${order.table_num}</h3>
-                                    <div class="order-time">${formatTime(order.created_at)} (${elapsed}m ago)</div>
+                                    <div class="order-time">${formatTime(order.created_at)} · <span style="color: ${remaining === 0 ? 'var(--danger)' : 'var(--text-muted)'};">${remaining === 0 ? 'Overdue!' : remaining + 'm remaining'}</span></div>
                                 </div>
                                 <div class="badge ${order.status === 'pending' ? 'badge-warning' : 'badge-danger'}">
                                     ${order.status.toUpperCase()}
@@ -334,6 +364,22 @@
                 playNotification();
             } catch (e) {
                 showToast('Failed to update status', 'error');
+            }
+        }
+
+        async function completeAll() {
+            if (!confirm('Mark all active orders as completed?')) return;
+            try {
+                const orders = await DataStore.getKitchenOrders();
+                const active = orders.filter(o => o.status !== 'completed');
+                if (active.length === 0) { showToast('No active orders', 'info'); return; }
+                await Promise.all(active.map(o => DataStore.updateOrderStatus(o.id, 'completed')));
+                await renderOrders();
+                await updateStats();
+                showToast(`Completed ${active.length} order(s)!`, 'success');
+                playNotification();
+            } catch (e) {
+                showToast('Failed to complete all orders', 'error');
             }
         }
 

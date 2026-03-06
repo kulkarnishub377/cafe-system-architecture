@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu - # SK cafe</title>
+    <title>Menu - The Bean & Brew Café</title>
     <link rel="manifest" href="manifest.json">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -21,7 +21,7 @@
         .hero-banner {
             height: 250px;
             position: relative;
-            background: url('https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=2787&auto=format&fit=crop') center/cover;
+            background: url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=2940&auto=format&fit=crop') center/cover;
             border-radius: 0 0 32px 32px;
             margin-bottom: 24px;
             display: flex;
@@ -51,8 +51,8 @@
     <!-- Hero Section -->
     <div class="hero-banner">
         <div class="hero-text">
-            <div class="badge badge-warning" style="margin-bottom: 8px;">Table <span id="tableNum">0</span></div>
-            <h1 class="font-serif" style="font-size: 32px; line-height: 1.1;">Good Evening,<br><span
+            <div class="badge badge-warning" style="margin-bottom: 8px;">The Bean & Brew Café · Table <span id="tableNum">0</span></div>
+            <h1 class="font-serif" id="greetingText" style="font-size: 32px; line-height: 1.1;">Good Evening,<br><span
                     class="text-accent">Foodie!</span></h1>
         </div>
         <div style="position: absolute; top: 16px; right: 16px; z-index: 10; display: flex; gap: 12px;">
@@ -71,6 +71,14 @@
     <!-- Instagram-style Stories (Categories) -->
     <div class="story-scroll" id="categoryList">
         <!-- Rendered by JS -->
+    </div>
+
+    <!-- Dietary Filter Bar -->
+    <div id="dietaryFilters" style="display: flex; gap: 8px; padding: 0 16px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <button class="diet-filter-btn active" data-filter="all" onclick="setDietaryFilter('all', this)" style="white-space: nowrap; padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">All</button>
+        <button class="diet-filter-btn" data-filter="veg" onclick="setDietaryFilter('veg', this)" style="white-space: nowrap; padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-dark); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">🌿 Veg Only</button>
+        <button class="diet-filter-btn" data-filter="spicy" onclick="setDietaryFilter('spicy', this)" style="white-space: nowrap; padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-dark); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">🌶️ Spicy</button>
+        <button class="diet-filter-btn" data-filter="trending" onclick="setDietaryFilter('trending', this)" style="white-space: nowrap; padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-dark); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">⭐ Chef's Pick</button>
     </div>
 
     <!-- Main Menu Content -->
@@ -137,6 +145,12 @@
                     <textarea class="input" id="desktopCustNotes" placeholder="Any special requests? (e.g. less sugar)"
                         style="min-height: 60px; resize: none; margin-bottom: 12px;"></textarea>
 
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <input type="text" class="input" id="promoCodeDesktop" placeholder="Promo code" style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="applyPromo('desktop')" style="padding: 12px 14px; font-size: 12px;">Apply</button>
+                    </div>
+                    <div id="promoDesktopMsg" style="font-size: 12px; margin-bottom: 12px; color: var(--text-muted);"></div>
+
                     <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="placeOrder('desktop')">
                         Confirm Order <i class="ri-arrow-right-line"></i>
                     </button>
@@ -168,6 +182,10 @@
             <i class="ri-search-line"></i>
             Search
         </button>
+        <button class="nav-item" onclick="toggleFavorites()">
+            <i class="ri-heart-line"></i>
+            Favorites
+        </button>
         <button class="nav-item" onclick="showOrders()">
             <i class="ri-file-list-3-line"></i>
             Orders
@@ -189,7 +207,12 @@
             <div style="margin-top: 24px;">
                 <input type="text" class="input" id="custName" placeholder="Your Name" style="margin-bottom: 12px;">
                 <textarea class="input" id="custNotes" placeholder="Any special requests? (e.g. less sugar)"
-                    style="min-height: 80px; resize: none;"></textarea>
+                    style="min-height: 80px; resize: none; margin-bottom: 12px;"></textarea>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" class="input" id="promoCodeMobile" placeholder="Promo code (optional)" style="flex: 1;">
+                    <button class="btn btn-secondary" onclick="applyPromo('mobile')" style="padding: 12px 16px; font-size: 13px;">Apply</button>
+                </div>
+                <div id="promoMobileMsg" style="font-size: 12px; margin-top: 6px; color: var(--text-muted);"></div>
             </div>
         </div>
 
@@ -233,6 +256,17 @@
             // Instant Theme Load
             const savedTheme = localStorage.getItem('sk_theme');
             if (savedTheme === 'light') document.body.classList.add('light-mode');
+
+            // Dynamic greeting
+            const hour = new Date().getHours();
+            const greetEl = document.getElementById('greetingText');
+            if (greetEl) {
+                let greeting = 'Good Evening';
+                if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+                else if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+                greetEl.innerHTML = `${greeting},<br><span class="text-accent">Foodie!</span>`;
+            }
+
             updateThemeIcon();
 
             // Params
@@ -320,6 +354,29 @@
             if (navigator.vibrate) navigator.vibrate(20);
         }
 
+        let activeDietaryFilter = 'all';
+
+        function setDietaryFilter(filter, btn) {
+            activeDietaryFilter = filter;
+            document.querySelectorAll('.diet-filter-btn').forEach(b => {
+                b.style.background = 'var(--bg-card)';
+                b.style.color = 'var(--text-dark)';
+                b.style.borderColor = 'var(--border)';
+            });
+            btn.style.background = 'var(--accent)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'var(--accent)';
+
+            if (filter === 'veg') {
+                isVegFilter = true;
+            } else {
+                isVegFilter = false;
+            }
+            renderMenu(document.getElementById('searchInput').value);
+            renderTrending();
+            if (navigator.vibrate) navigator.vibrate(20);
+        }
+
         function selectCat(id) {
             currentCat = id;
             if (navigator.vibrate) navigator.vibrate(20);
@@ -367,6 +424,8 @@
             if (currentCat !== 'all') items = items.filter(i => i.category === currentCat);
             if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
             if (isVegFilter) items = items.filter(i => i.is_veg);
+            if (activeDietaryFilter === 'spicy') items = items.filter(i => !i.is_veg);
+            if (activeDietaryFilter === 'trending') items = items.filter(i => i.trending);
 
             const grid = document.getElementById('menuGrid');
             const empty = document.getElementById('emptyState');
@@ -437,6 +496,22 @@
 
             document.getElementById('desktopCartTotal').textContent = total;
             renderDesktopCart();
+        }
+
+        async function applyPromo(source) {
+            const inputId = source === 'desktop' ? 'promoCodeDesktop' : 'promoCodeMobile';
+            const msgId = source === 'desktop' ? 'promoDesktopMsg' : 'promoMobileMsg';
+            const code = document.getElementById(inputId).value.trim();
+            if (!code) return;
+            const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            try {
+                const result = await DataStore.validateDiscount(code, subtotal);
+                document.getElementById(msgId).textContent = `✓ ${result.message || 'Promo applied!'}`;
+                document.getElementById(msgId).style.color = 'var(--success)';
+            } catch (e) {
+                document.getElementById(msgId).textContent = '✗ Invalid or expired promo code';
+                document.getElementById(msgId).style.color = 'var(--danger)';
+            }
         }
 
         function renderDesktopCart() {
@@ -652,6 +727,32 @@
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let favorites = JSON.parse(localStorage.getItem('bb_favorites') || '[]');
+
+        function toggleFavorites() {
+            const favItems = menuData.filter(i => favorites.includes(i.id));
+            if (favItems.length === 0) {
+                showToast('No favorites yet! Tap ❤️ on menu items to save them.', 'info');
+                return;
+            }
+            currentCat = 'all';
+            document.getElementById('menuTitle').textContent = '❤️ Your Favorites';
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = favItems.map(item => `
+                <div class="menu-card overflow-hidden" style="border-radius: 20px;">
+                    <div class="menu-card-img" style="position: relative;">
+                        <img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
+                        <div class="add-btn-round" onclick="addToCart(${item.id})"><i class="ri-add-line"></i></div>
+                    </div>
+                    <div style="padding: 12px;">
+                        <div style="font-weight: 600; font-size: 15px;">${item.name}</div>
+                        <div class="text-accent" style="font-weight: 700;">₹${item.price}</div>
+                    </div>
+                </div>
+            `).join('');
+            scrollToTop();
         }
 
         init();
