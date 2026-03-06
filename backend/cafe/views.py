@@ -340,7 +340,7 @@ class TableSessionViewSet(ViewSet):
         if ip_address:
             CustomerVisit.objects.create(
                 ip_address=ip_address,
-                table_num=int(pk),
+                table_num=pk,
                 sales_record=sale_record,
             )
         return Response({'detail': f'Table {pk} session closed.', 'total': bill['total']})
@@ -744,7 +744,7 @@ class CafeSettingsViewSet(ViewSet):
     """Get or update the cafe-wide singleton configuration."""
 
     def get_permissions(self):
-        if self.request.user and self.request.user.is_authenticated:
+        if self.request.user.is_authenticated:
             return [IsAdminStaff()]
         return [AllowAny()]
 
@@ -802,7 +802,7 @@ class AuthViewSet(ViewSet):
         """Delete the current user's auth token (logout)."""
         try:
             request.user.auth_token.delete()
-        except Exception:
+        except (AttributeError, ValueError):
             pass
         return Response({'detail': 'Logged out.'})
 
