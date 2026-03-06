@@ -8,6 +8,7 @@ Hierarchy:
   SalesRecord, CafeSettings
 """
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -186,6 +187,7 @@ class TableSession(BaseModel):
     )
     discount_code = models.CharField(max_length=50, blank=True)
     discount_amount = models.PositiveIntegerField(default=0)
+    ip_address = models.GenericIPAddressField(null=True, blank=True, help_text='Customer IP for anonymous tracking')
 
     class Meta:
         ordering = ['table_num']
@@ -373,11 +375,13 @@ class SalesRecord(BaseModel):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default=PAYMENT_CASH)
     start_time = models.DateTimeField()
     closed_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True, help_text='Customer IP captured at order time')
 
     class Meta:
         ordering = ['-closed_at']
         indexes = [
             models.Index(fields=['closed_at']),
+            models.Index(fields=['ip_address']),
         ]
 
     def __str__(self) -> str:
@@ -448,3 +452,56 @@ class CafeSettings(models.Model):
         """Return the singleton settings object, creating it if necessary."""
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+# ---------------------------------------------------------------------------
+# Staff Profiles
+# ---------------------------------------------------------------------------
+
+class StaffProfile(models.Model):
+    """Links a Django User to a cafe staff role."""
+
+    ROLE_ADMIN = 'admin'
+    ROLE_KITCHEN = 'kitchen'
+    ROLE_CASHIER = 'cashier'
+
+    ROLE_CHOICES = [
+        (ROLE_ADMIN, 'Admin'),
+        (ROLE_KITCHEN, 'Kitchen'),
+        (ROLE_CASHIER, 'Cashier'),
+    ]
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='staff_profile',
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_KITCHEN)
+
+    class Meta:
+        verbose_name = 'Staff Profile'
+
+    def __str__(self) -> str:
+        return f'{self.user.username} ({self.role})'
+
+
+# ---------------------------------------------------------------------------
+# Customer Visits
+# ---------------------------------------------------------------------------
+
+class CustomerVisit(BaseModel):
+    """Records an anonymous customer visit keyed by IP address."""
+
+    ip_address = models.GenericIPAddressField(db_index=True)
+    table_num = models.PositiveSmallIntegerField()
+    sales_record = models.ForeignKey(
+        SalesRecord,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='customer_visits',
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f'Visit from {self.ip_address} at Table {self.table_num}'

@@ -572,8 +572,16 @@ class KitchenOrderTests(TestCase):
     """API tests for /api/kitchen/ endpoints."""
 
     def setUp(self):
+        from django.contrib.auth.models import User
+        from rest_framework.authtoken.models import Token
+        from .models import StaffProfile
+
         self.client = APIClient()
         self.item = make_item(name='Latte', price=180, category='coffee')
+        kitchen_user = User.objects.create_user('kitchen_user_test', password='pass')
+        StaffProfile.objects.create(user=kitchen_user, role=StaffProfile.ROLE_KITCHEN)
+        token = Token.objects.create(user=kitchen_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def _place_order(self, table=1):
         self.client.post(
@@ -855,3 +863,109 @@ class CafeSettingsTests(TestCase):
         self.assertIn('closing_time', resp.data)
         self.assertIn('currency_symbol', resp.data)
         self.assertIn('footer_message', resp.data)
+
+# ---------------------------------------------------------------------------
+# Auth & Permission tests
+# ---------------------------------------------------------------------------
+
+class AuthTests(TestCase):
+    """API tests for /api/auth/ token authentication endpoints."""
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from rest_framework.authtoken.models import Token
+        from .models import StaffProfile
+
+        self.client = APIClient()
+        self.user = User.objects.create_user('auth_testuser', password='testpass123')
+        StaffProfile.objects.create(user=self.user, role=StaffProfile.ROLE_ADMIN)
+        self.token = Token.objects.create(user=self.user)
+
+    def test_obtain_token_valid_credentials(self):
+        resp = self.client.post(
+            '/api/auth/login/',
+            {'username': 'auth_testuser', 'password': 'testpass123'},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('token', resp.data)
+        self.assertEqual(resp.data['username'], 'auth_testuser')
+
+    def test_obtain_token_invalid_credentials(self):
+        resp = self.client.post(
+            '/api/auth/login/',
+            {'username': 'auth_testuser', 'password': 'wrongpassword'},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_obtain_token_missing_credentials(self):
+        resp = self.client.post('/api/auth/login/', {}, format='json')
+        self.assertEqual(resp.status_code, 400)
+
+
+class PermissionTests(TestCase):
+    """Tests that permission classes are correctly enforced on protected endpoints."""
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from rest_framework.authtoken.models import Token
+        from .models import StaffProfile
+
+        self.client = APIClient()
+
+        self.admin_user = User.objects.create_user('perm_admin', password='pass')
+        self.admin_user.is_superuser = True
+        self.admin_user.save()
+        self.admin_token = Token.objects.create(user=self.admin_user)
+
+        self.kitchen_user = User.objects.create_user('perm_kitchen', password='pass')
+        StaffProfile.objects.create(user=self.kitchen_user, role=StaffProfile.ROLE_KITCHEN)
+        self.kitchen_token = Token.objects.create(user=self.kitchen_user)
+
+    def test_kitchen_endpoint_requires_auth(self):
+        self.client.credentials()
+        resp = self.client.patch('/api/kitchen/1/status/', {'status': 'preparing'})
+        self.assertEqual(resp.status_code, 401)
+
+    def test_kitchen_accessible_with_kitchen_token(self):
+        ko = KitchenOrder.objects.create(table_num=1, status='pending')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
+        resp = self.client.patch(f'/api/kitchen/{ko.pk}/status/', {'status': 'preparing'})
+        self.assertEqual(resp.status_code, 200)
+
+    def test_kitchen_accessible_with_admin_token(self):
+        ko = KitchenOrder.objects.create(table_num=2, status='pending')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        resp = self.client.patch(f'/api/kitchen/{ko.pk}/status/', {'status': 'completed'})
+        self.assertEqual(resp.status_code, 200)
+
+    def test_sales_requires_auth(self):
+        self.client.credentials()
+        resp = self.client.get('/api/sales/')
+        self.assertEqual(resp.status_code, 401)
+
+    def test_sales_accessible_with_admin_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        resp = self.client.get('/api/sales/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_settings_requires_admin(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
+        resp = self.client.post('/api/settings/', {'cafe_name': 'Hacked'}, format='json')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_settings_accessible_with_admin_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        resp = self.client.post('/api/settings/', {'cafe_name': 'New Name'}, format='json')
+        self.assertIn(resp.status_code, [200, 201])
+
+    def test_customers_endpoint_requires_auth(self):
+        self.client.credentials()
+        resp = self.client.get('/api/customers/')
+        self.assertEqual(resp.status_code, 401)
+
+    def test_customers_accessible_with_staff_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.kitchen_token.key)
+        resp = self.client.get('/api/customers/')
+        self.assertEqual(resp.status_code, 200)

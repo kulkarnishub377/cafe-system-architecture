@@ -11,6 +11,7 @@ from django.http import HttpRequest
 
 from .models import (
     CafeSettings,
+    CustomerVisit,
     Discount,
     KitchenOrder,
     KitchenOrderItem,
@@ -19,6 +20,7 @@ from .models import (
     Reservation,
     SalesRecord,
     SessionItem,
+    StaffProfile,
     Table,
     TableSession,
 )
@@ -273,3 +275,32 @@ class CafeSettingsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         """Prevent accidental deletion of the settings row."""
         return False
+
+
+# ---------------------------------------------------------------------------
+# Staff Profiles
+# ---------------------------------------------------------------------------
+
+@admin.register(StaffProfile)
+class StaffProfileAdmin(admin.ModelAdmin):
+    """Admin for staff user profiles."""
+
+    list_display = ('user', 'role')
+    list_filter = ('role',)
+    search_fields = ('user__username',)
+    raw_id_fields = ('user',)
+
+
+# ---------------------------------------------------------------------------
+# Customer Visits
+# ---------------------------------------------------------------------------
+
+@admin.register(CustomerVisit)
+class CustomerVisitAdmin(admin.ModelAdmin):
+    """Admin for anonymous customer visit records."""
+
+    list_display = ('ip_address', 'table_num', 'sales_record', 'created_at')
+    list_filter = ('table_num',)
+    search_fields = ('ip_address',)
+    readonly_fields = ('created_at', 'updated_at')
+    date_hierarchy = 'created_at'

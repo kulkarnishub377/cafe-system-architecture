@@ -16,11 +16,13 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.permissions import AllowAny
 
 from .exceptions import InvalidDiscount, MenuItemOutOfStock
 from .filters import KitchenOrderFilter, MenuItemFilter, ReservationFilter, SalesRecordFilter
 from .models import (
     CafeSettings,
+    CustomerVisit,
     Discount,
     KitchenOrder,
     KitchenOrderItem,
@@ -29,6 +31,7 @@ from .models import (
     Reservation,
     SalesRecord,
     SessionItem,
+    StaffProfile,
     Table,
     TableSession,
 )
@@ -49,6 +52,7 @@ from .serializers import (
     TableSessionSerializer,
 )
 from .utils import calculate_bill
+from .permissions import IsAdminStaff, IsKitchenOrAdmin, IsStaffMember
 
 
 # ---------------------------------------------------------------------------
@@ -215,6 +219,7 @@ class TableSessionViewSet(ViewSet):
         session_type = request.data.get('session_type', TableSession.SESSION_TYPE_DINE_IN)
         discount_code = request.data.get('discount_code', '')
 
+        ip_address = request.META.get('REMOTE_ADDR')
         with transaction.atomic():
             session, created = TableSession.objects.get_or_create(
                 table_num=pk,
@@ -223,6 +228,7 @@ class TableSessionViewSet(ViewSet):
                     'special_instructions': special_instructions,
                     'session_type': session_type,
                     'discount_code': discount_code,
+                    'ip_address': ip_address,
                 },
             )
             if not created:
@@ -317,7 +323,8 @@ class TableSessionViewSet(ViewSet):
             items_snapshot, settings.tax_rate, session.discount_amount
         )
 
-        SalesRecord.objects.create(
+        ip_address = session.ip_address
+        sale_record = SalesRecord.objects.create(
             table_num=session.table_num,
             customer_name=session.customer_name,
             special_instructions=session.special_instructions,
@@ -327,8 +334,15 @@ class TableSessionViewSet(ViewSet):
             total=bill['total'],
             payment_method=payment_method,
             start_time=session.start_time,
+            ip_address=ip_address,
         )
         session.delete()
+        if ip_address:
+            CustomerVisit.objects.create(
+                ip_address=ip_address,
+                table_num=int(pk),
+                sales_record=sale_record,
+            )
         return Response({'detail': f'Table {pk} session closed.', 'total': bill['total']})
 
     @extend_schema(summary='Mark bill as printed', tags=['sessions'])
@@ -384,6 +398,7 @@ class KitchenOrderViewSet(ModelViewSet):
     queryset = KitchenOrder.objects.prefetch_related('order_items').all()
     serializer_class = KitchenOrderSerializer
     filterset_class = KitchenOrderFilter
+    permission_classes = [IsKitchenOrAdmin]
 
     def get_queryset(self):
         """Support legacy ``?status=`` param alongside the filter backend."""
@@ -528,6 +543,7 @@ class SalesRecordViewSet(ModelViewSet):
     filterset_class = SalesRecordFilter
     http_method_names = ['get', 'head', 'options']
     ordering_fields = ['closed_at', 'total', 'table_num']
+    permission_classes = [IsStaffMember]
 
 
 # ---------------------------------------------------------------------------
@@ -567,6 +583,11 @@ class DiscountViewSet(ModelViewSet):
     serializer_class = DiscountSerializer
     search_fields = ['code', 'description']
     ordering_fields = ['valid_until', 'value']
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [IsAdminStaff()]
+        return [AllowAny()]
 
     @extend_schema(
         summary='Validate a discount code and calculate savings',
@@ -722,6 +743,11 @@ class StatsViewSet(ViewSet):
 class CafeSettingsViewSet(ViewSet):
     """Get or update the cafe-wide singleton configuration."""
 
+    def get_permissions(self):
+        if self.request.user and self.request.user.is_authenticated:
+            return [IsAdminStaff()]
+        return [AllowAny()]
+
     @extend_schema(summary='Get cafe settings', tags=['settings'])
     def list(self, request):
         """Return the current cafe settings."""
@@ -736,3 +762,68 @@ class CafeSettingsViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+
+class AuthViewSet(ViewSet):
+    """Token-based authentication endpoints."""
+
+    @extend_schema(summary='Obtain auth token', tags=['auth'])
+    @action(detail=False, methods=['post'], url_path='login')
+    def login(self, request):
+        """Authenticate with username/password and return a token."""
+        from django.contrib.auth import authenticate
+        from rest_framework.authtoken.models import Token
+
+        username = request.data.get('username', '')
+        password = request.data.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return Response(
+                {'detail': 'Invalid credentials.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        token, _ = Token.objects.get_or_create(user=user)
+        profile = getattr(user, 'staff_profile', None)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'role': profile.role if profile else ('superuser' if user.is_superuser else 'staff'),
+        })
+
+    @extend_schema(summary='Invalidate auth token', tags=['auth'])
+    @action(detail=False, methods=['post'], url_path='logout',
+            permission_classes=[IsStaffMember])
+    def logout(self, request):
+        """Delete the current user's auth token (logout)."""
+        try:
+            request.user.auth_token.delete()
+        except Exception:
+            pass
+        return Response({'detail': 'Logged out.'})
+
+
+# ---------------------------------------------------------------------------
+# Customer Visits
+# ---------------------------------------------------------------------------
+
+class CustomerViewSet(ViewSet):
+    """Aggregate anonymous customer visit data by IP address."""
+
+    permission_classes = [IsStaffMember]
+
+    @extend_schema(summary='List customer visit summaries', tags=['customers'])
+    def list(self, request):
+        """Return customer visit counts grouped by IP address."""
+        from django.db.models import Count, Max
+        visits = (
+            CustomerVisit.objects
+            .values('ip_address')
+            .annotate(visits=Count('id'), last_seen=Max('created_at'))
+            .order_by('-visits')
+        )
+        return Response(list(visits))

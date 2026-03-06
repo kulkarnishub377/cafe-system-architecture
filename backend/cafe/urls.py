@@ -9,7 +9,9 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AuthViewSet,
     CafeSettingsViewSet,
+    CustomerViewSet,
     DiscountViewSet,
     KitchenOrderViewSet,
     MenuItemViewSet,
@@ -31,6 +33,8 @@ router.register(r'tables', TableViewSet, basename='table')
 router.register(r'reservations', ReservationViewSet, basename='reservation')
 router.register(r'discounts', DiscountViewSet, basename='discount')
 router.register(r'feedback', OrderFeedbackViewSet, basename='feedback')
+router.register(r'auth', AuthViewSet, basename='auth')
+router.register(r'customers', CustomerViewSet, basename='customer')
 
 # Sessions are keyed by table number, not a standard pk
 sessions_urls = [
