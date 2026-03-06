@@ -796,8 +796,7 @@ class AuthViewSet(ViewSet):
         })
 
     @extend_schema(summary='Invalidate auth token', tags=['auth'])
-    @action(detail=False, methods=['post'], url_path='logout',
-            permission_classes=[IsStaffMember])
+    @action(detail=False, methods=['post'], url_path='logout', permission_classes=[IsStaffMember])
     def logout(self, request):
         """Delete the current user's auth token (logout)."""
         try:
